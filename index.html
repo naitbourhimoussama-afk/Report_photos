@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rapport Photos</title>
+    <title>Reportage Photos</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -12,63 +13,147 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary-dark: #04243c;
+            --primary: #19484e;
+            --primary-light: #2a6e7a;
+            --accent: #5fa586;
+            --accent-light: #8fc9b3;
+            --light: #f8f9fa;
+            --dark: #333;
+            --gray: #7f8c8d;
+            --light-gray: #ecf0f1;
+            --error: #e74c3c;
+            --warning: #f39c12;
+            --success: #27ae60;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #04243c 100%);
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
             min-height: 100vh;
             padding: 20px;
+            color: var(--dark);
+            line-height: 1.6;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
             overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .header {
-            background: linear-gradient(135deg, #FFFFFF 50%, #FFFFFF 100%);
-            color: Black;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
-        
-        logo {
-            height: 40px;   /* par exemple : 60 pixels de haut */
-            width: 40px;    /* largeur automatique pour conserver le ratio */
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
         }
-        
+
+        .logo-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            height: 60px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
         .header h1 {
-            font-size: 3em;
+            font-size: 2.8rem;
             margin-bottom: 10px;
-            font-weight: 300;
-            font-weight: bold;  
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
 
         .header p {
-            font-size: 1.1em;
+            font-size: 1.2rem;
             opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
         }
 
         .content {
             padding: 40px;
         }
 
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .section-title i {
+            background: var(--primary);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .project-info-section {
-            background: #19484e;
-            border-radius: 15px;
+            background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+            border-radius: 12px;
             padding: 30px;
             margin-bottom: 30px;
-            border: 2px solid #19484e;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-info-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2304243c' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.05;
         }
 
         .project-info-title {
-            font-size: 1.3em;
-            margin-bottom: 20px;
-            color: #ffffff;
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: white;
             text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .project-info-grid {
@@ -80,102 +165,168 @@
         .info-field {
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .info-field label {
             font-weight: 600;
             margin-bottom: 8px;
-            color: #ffffff;
+            color: var(--accent-light);
+            font-size: 0.95rem;
         }
 
         .info-field input {
-            padding: 12px;
-            border: 2px solid #19484e;
+            padding: 14px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.3s ease;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-field input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
         }
 
         .info-field input:focus {
             outline: none;
-            border-color: #19484e;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(95, 165, 134, 0.3);
         }
 
         .upload-section {
-            background: #ffffff;
-            border-radius: 15px;
-            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
             margin-bottom: 30px;
-            border: 2px dashed #19484e;
+            border: 2px dashed var(--primary);
             text-align: center;
             transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         }
 
         .upload-section:hover {
-            border-color: #19484e;
-            background: #ecf0f1;
+            border-color: var(--accent);
+            background: #f5f9ff;
         }
 
         .upload-section.dragover {
-            border-color: #19484e;
-            background: #d5f4e6;
+            border-color: var(--accent);
+            background: rgba(143, 201, 179, 0.1);
         }
 
         .upload-button {
-            background: linear-gradient(135deg, #04243c, #244854);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.1em;
+            padding: 15px 35px;
+            border-radius: 30px;
+            font-size: 1.1rem;
             cursor: pointer;
             transition: all 0.3s ease;
             margin: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(25, 72, 78, 0.3);
         }
 
         .upload-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(25, 72, 78, 0.4);
+        }
+
+        .upload-button:active {
+            transform: translateY(0);
+        }
+
+        .upload-button i {
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--light-gray);
+            position: relative;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--gray);
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .categories-section {
-            background: #19484e;
-            border-radius: 15px;
+            background: var(--light);
+            border-radius: 12px;
             padding: 30px;
             margin-bottom: 30px;
-        }
-
-        .categories-title {
-            font-size: 1.3em;
-            margin-bottom: 20px;
-            color: #ffffff;
-            text-align: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         }
 
         .categories-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 25px;
         }
 
         .category-card {
             background: white;
             border-radius: 10px;
             padding: 20px;
-            border: 2px solid #ecf0f1;
+            border: 1px solid var(--light-gray);
             transition: all 0.3s ease;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
         }
 
         .category-card:hover {
-            border-color: #5fa586;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
 
         .category-card.selected {
-            border-color: #27ae60;
-            background: #d5f4e6;
+            border-color: var(--accent);
+            background: rgba(143, 201, 179, 0.05);
+            box-shadow: 0 0 0 3px rgba(95, 165, 134, 0.2);
         }
 
         .category-header {
@@ -186,80 +337,133 @@
         }
 
         .category-title {
-            font-size: 1.1em;
-            font-weight: 600;
-            color: #04243c;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .category-count {
-            background: #5fa586;
+            background: var(--accent);
             color: white;
-            padding: 4px 8px;
+            padding: 5px 10px;
             border-radius: 15px;
-            font-size: 0.9em;
-            min-width: 25px;
+            font-size: 0.9rem;
+            min-width: 30px;
             text-align: center;
+            font-weight: 600;
         }
 
         .category-card.selected .category-count {
-            background: #27ae60;
+            background: var(--primary);
         }
 
         .category-description {
-            font-size: 0.9em;
-            color: #7f8c8d;
+            font-size: 0.95rem;
+            color: var(--gray);
             margin-bottom: 15px;
+            line-height: 1.5;
         }
 
         .category-photos {
             display: flex;
             flex-wrap: wrap;
-            gap: 5px;
+            gap: 6px;
             min-height: 60px;
-            border: 1px dashed #bdc3c7;
+            border: 1px dashed var(--light-gray);
             border-radius: 8px;
             padding: 10px;
+            background: var(--light);
         }
 
         .category-photos.empty {
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #95a5a6;
+            color: var(--gray);
             font-style: italic;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'%3E%3C/circle%3E%3Cpolyline points='21 15 16 10 5 21'%3E%3C/polyline%3E%3C/svg%3E") center no-repeat;
+            background-size: 30px;
+            background-position: center 10px;
+            padding-top: 45px;
         }
 
         .category-thumb {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             border-radius: 5px;
             object-fit: cover;
-            border: 2px solid #ecf0f1;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .category-thumb:hover {
+            transform: scale(1.1);
+            z-index: 2;
+        }
+
+        .photos-container {
+            margin-top: 20px;
+        }
+
+        .sort-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .sort-button {
+            background: var(--light);
+            border: 1px solid var(--light-gray);
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .sort-button:hover {
+            background: #e3f2fd;
+            border-color: #bbdefb;
+        }
+
+        .sort-button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         .photos-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 30px;
         }
 
         .photo-item {
             background: white;
-            border-radius: 15px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .photo-item:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
         }
 
         .photo-container {
             position: relative;
-            height: 250px;
+            height: 270px;
             overflow: hidden;
         }
 
@@ -267,7 +471,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            transition: transform 0.5s ease;
         }
 
         .photo-item:hover .photo-img {
@@ -276,41 +480,55 @@
 
         .photo-controls {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 15px;
+            right: 15px;
             display: flex;
-            gap: 5px;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 6px;
+            border-radius: 30px;
         }
 
         .control-btn {
-            background: rgba(0,0,0,0.7);
+            background: none;
             color: white;
             border: none;
-            width: 35px;
-            height: 35px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            transition: all 0.3s ease;
+            font-size: 16px;
+            transition: all 0.2s ease;
         }
 
         .control-btn:hover {
-            background: rgba(231, 76, 60, 0.9);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .control-btn.delete:hover {
+            color: var(--error);
+        }
+
+        .control-btn.rotate:hover {
+            color: var(--accent);
         }
 
         .category-badge {
             position: absolute;
-            top: 10px;
-            left: 10px;
+            top: 15px;
+            left: 15px;
             background: rgba(52, 152, 219, 0.9);
             color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8em;
-            font-weight: 500;
+            padding: 6px 15px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .photo-info {
@@ -319,93 +537,147 @@
 
         .photo-info input {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ecf0f1;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 1rem;
             transition: border-color 0.3s ease;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .photo-info input:focus {
             outline: none;
-            border-color: #3498db;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(25, 72, 78, 0.2);
         }
 
         .photo-info select {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #ecf0f1;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 1rem;
             transition: border-color 0.3s ease;
             background: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2319484e' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 12px;
         }
 
         .photo-info select:focus {
             outline: none;
-            border-color: #3498db;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(25, 72, 78, 0.2);
+        }
+
+        .photo-details {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .photo-details input {
+            margin-bottom: 0;
         }
 
         .export-section {
             text-align: center;
             margin-top: 40px;
-            padding: 30px;
-            background: #f8f9fa;
+            padding: 40px;
+            background: linear-gradient(to bottom, var(--light), white);
             border-radius: 15px;
+            border: 1px solid var(--light-gray);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         }
 
         .export-button {
-            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
-            padding: 20px 40px;
-            border-radius: 25px;
-            font-size: 1.2em;
+            padding: 18px 45px;
+            border-radius: 30px;
+            font-size: 1.2rem;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 20px rgba(25, 72, 78, 0.4);
         }
 
         .export-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(25, 72, 78, 0.5);
         }
 
         .export-button:disabled {
-            background: #bdc3c7;
+            background: var(--gray);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+            opacity: 0.7;
         }
 
         .photo-count {
-            font-size: 1.1em;
-            color: #7f8c8d;
+            font-size: 1.2rem;
+            color: var(--gray);
             margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .validation-check {
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            color: var(--gray);
         }
 
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #7f8c8d;
+            color: var(--gray);
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            color: var(--light-gray);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .empty-state p {
+            max-width: 500px;
+            margin: 0 auto;
         }
 
         .loading {
             display: none;
             text-align: center;
-            padding: 20px;
-            color: #3498db;
+            padding: 40px;
+            color: var(--primary);
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #ecf0f1;
-            border-top: 4px solid #3498db;
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--light-gray);
+            border-top: 4px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin: 0 auto 10px;
+            margin: 0 auto 20px;
         }
 
         @keyframes spin {
@@ -413,17 +685,37 @@
             100% { transform: rotate(360deg); }
         }
 
+        .progress-bar {
+            height: 6px;
+            background: var(--light-gray);
+            border-radius: 3px;
+            margin: 20px auto 10px;
+            max-width: 300px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--accent);
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
         .toast {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #27ae60;
+            top: 30px;
+            right: 30px;
+            background: var(--primary);
             color: white;
-            padding: 15px 25px;
+            padding: 18px 25px;
             border-radius: 8px;
             z-index: 1000;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
         }
 
         .toast.show {
@@ -431,58 +723,15 @@
         }
 
         .toast.error {
-            background: #e74c3c;
+            background: var(--error);
         }
 
-        .tabs {
-            display: flex;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #19484e;
+        .toast.warning {
+            background: var(--warning);
         }
 
-        .tab {
-            padding: 15px 30px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1em;
-            color: #7f8c8d;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-        }
-
-        .tab.active {
-            color: #3498db;
-            border-bottom-color: #3498db;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .sort-controls {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        .sort-button {
-            background: #ecf0f1;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .sort-button.active {
-            background: #3498db;
-            color: white;
+        .toast i {
+            font-size: 1.4rem;
         }
 
         /* Modal pour la caméra */
@@ -493,8 +742,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 2000;
             align-items: center;
             justify-content: center;
         }
@@ -502,102 +751,165 @@
         .camera-container {
             background: white;
             border-radius: 15px;
-            padding: 20px;
+            padding: 25px;
             width: 90%;
             max-width: 800px;
             max-height: 90vh;
             display: flex;
             flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
         }
 
         .camera-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--light-gray);
         }
 
         .camera-header h3 {
-            color: #2c3e50;
-            font-size: 1.3em;
+            color: var(--primary-dark);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .close-camera {
-            background: #e74c3c;
+            background: var(--error);
             color: white;
             border: none;
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-camera:hover {
+            transform: rotate(90deg);
         }
 
         .camera-preview {
             width: 100%;
-            height: 400px;
-            background: #333;
+            height: 450px;
+            background: #222;
             border-radius: 10px;
             overflow: hidden;
             margin-bottom: 20px;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #cameraFeed {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
         }
 
         .camera-controls {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
         }
 
         .camera-btn {
-            padding: 12px 25px;
-            border-radius: 25px;
+            padding: 14px 35px;
+            border-radius: 30px;
             border: none;
             cursor: pointer;
-            font-size: 1em;
+            font-size: 1.1rem;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
         }
 
         .capture-btn {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
+            box-shadow: 0 5px 15px rgba(25, 72, 78, 0.4);
         }
 
         .capture-btn:hover {
-            background: linear-gradient(135deg, #2980b9, #2573a7);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(25, 72, 78, 0.5);
         }
 
         .cancel-btn {
-            background: #ecf0f1;
-            color: #2c3e50;
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--light-gray);
         }
 
         .cancel-btn:hover {
-            background: #dce4e8;
+            background: #e9ecef;
         }
 
         .camera-switch {
             position: absolute;
-            bottom: 15px;
-            right: 15px;
-            background: rgba(0, 0, 0, 0.6);
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 10px 20px;
+            border-radius: 30px;
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .camera-switch:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .photo-counter {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1024px) {
+            .photos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
         }
 
         @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .project-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .photos-grid {
                 grid-template-columns: 1fr;
             }
@@ -606,25 +918,12 @@
                 grid-template-columns: 1fr;
             }
             
-            .content {
-                padding: 20px;
-            }
-            
-            .header {
-                padding: 20px;
-            }
-            
-            .header h1 {
-                font-size: 3em;
-                 font-weight: bold
-            }
-            
             .tabs {
                 flex-direction: column;
             }
             
             .tab {
-                text-align: center;
+                justify-content: center;
             }
             
             .sort-controls {
@@ -633,7 +932,36 @@
             
             .camera-container {
                 width: 95%;
-                padding: 15px;
+                padding: 20px;
+            }
+            
+            .camera-preview {
+                height: 350px;
+            }
+            
+            .camera-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .camera-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .photo-details {
+                flex-direction: column;
+            }
+            
+            .photo-details input {
+                width: 100%;
+            }
+            
+            .upload-button {
+                width: 100%;
+                margin: 5px 0;
             }
             
             .camera-preview {
@@ -645,83 +973,97 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://upload.wikimedia.org/wikipedia/fr/0/0c/Equans_Logo.png" alt="Logo" class="logo">
-            <h1>📸 Reportage Photos</h1>
-            <p>Organisez vos photos par catégories et exportez en PDF</p>
+            <div class="logo-container">
+                <img src="https://upload.wikimedia.org/wikipedia/fr/0/0c/Equans_Logo.png" alt="Logo Equans" class="logo">
+            </div>
+            <h1><i class="fas fa-camera"></i> Reportage Photos Chantier</h1>
+            <p>Outil professionnel pour documenter vos projets, organiser les photos par catégorie et générer des rapports PDF</p>
         </div>
 
         <div class="content">
             <!-- Section informations du projet -->
             <div class="project-info-section">
-                <h3 class="project-info-title">📋 Informations du projet</h3>
+                <h3 class="project-info-title"><i class="fas fa-info-circle"></i> Informations du projet</h3>
                 <div class="project-info-grid">
                     <div class="info-field">
-                        <label for="affaire">Affaire :</label>
+                        <label for="affaire"><i class="fas fa-building"></i> Affaire :</label>
                         <input type="text" id="affaire" placeholder="Ex: GLOBAL SWITCH - CAMPUS PARIS CLICHY - PAR_E">
                     </div>
                     <div class="info-field">
-                        <label for="code">Code :</label>
+                        <label for="code"><i class="fas fa-barcode"></i> Code :</label>
                         <input type="text" id="code" placeholder="Ex: P 1 1 8 6">
                     </div>
                     <div class="info-field">
-                        <label for="agence">Agence :</label>
+                        <label for="agence"><i class="fas fa-map-marker-alt"></i> Agence :</label>
                         <input type="text" id="agence" placeholder="Ex: Agence Génie Climatique">
                     </div>
                     <div class="info-field">
-                        <label for="rapportType">Type de rapport :</label>
+                        <label for="rapportType"><i class="fas fa-file-alt"></i> Type de rapport :</label>
                         <input type="text" id="rapportType" placeholder="Ex: Rapport Photo IHM">
                     </div>
                     <div class="info-field">
-                        <label for="essais">Essais :</label>
+                        <label for="essais"><i class="fas fa-flask"></i> Essais :</label>
                         <input type="text" id="essais" placeholder="Ex: ESSAIS L4">
                     </div>
                     <div class="info-field">
-                        <label for="rmu">Salle :</label>
+                        <label for="rmu"><i class="fas fa-door-open"></i> Salle :</label>
                         <input type="text" id="rmu" placeholder="Ex: HV/LV RMU L3D">
                     </div>
                 </div>
             </div>
 
             <div class="upload-section" id="uploadSection">
-                <h3>📁 Importer des photos</h3>
-                <p>Prendre les photos ou cliquez pour les sélectionner</p>
-                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+                <h3><i class="fas fa-cloud-upload-alt"></i> Importer des photos</h3>
+                <p>Prendre des photos directement ou sélectionnez-les depuis votre appareil</p>
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px; flex-wrap: wrap;">
                     <button class="upload-button" onclick="document.getElementById('photoInput').click()">
-                        Choisir des photos
+                        <i class="fas fa-folder-open"></i> Choisir des photos
                     </button>
                     <button class="upload-button" onclick="openCamera()">
-                        Prendre une photo
+                        <i class="fas fa-camera"></i> Prendre une photo
                     </button>
                 </div>
                 <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
-                <p style="margin-top: 15px; font-size: 0.9em; color: #7f8c8d;">
-                    Formats acceptés : JPG, PNG, GIF 
+                <p style="margin-top: 20px; font-size: 0.95rem; color: var(--gray);">
+                    Formats acceptés : JPG, PNG | Taille max : 5Mo par photo
                 </p>
             </div>
 
             <div class="tabs">
-                <button class="tab active" onclick="switchTab('categories')">📋 Catégories</button>
-                <button class="tab" onclick="switchTab('photos')">🖼️ Toutes les photos</button>
+                <button class="tab active" onclick="switchTab('categories')">
+                    <i class="fas fa-folder"></i> Catégories
+                </button>
+                <button class="tab" onclick="switchTab('photos')">
+                    <i class="fas fa-images"></i> Toutes les photos
+                </button>
             </div>
 
             <div id="categoriesTab" class="tab-content active">
                 <div class="categories-section">
-                    <h3 class="categories-title">🗂️ Organisez vos photos par catégories</h3>
+                    <h3 class="section-title"><i class="fas fa-tasks"></i> Organisez vos photos par catégories</h3>
                     <div class="categories-grid" id="categoriesGrid"></div>
                 </div>
             </div>
 
             <div id="photosTab" class="tab-content">
-                <div class="sort-controls">
-                    <button class="sort-button" onclick="sortPhotos('stepNumber')">Trier par numéro d'étape</button>
-                    <button class="sort-button" onclick="sortPhotos('date')">Trier par date</button>
-                    <button class="sort-button" onclick="sortPhotos('category')">Trier par catégorie</button>
-                </div>
-                <div id="photosContainer">
-                    <div class="empty-state">
-                        <div style="font-size: 4em; margin-bottom: 20px;">📷</div>
-                        <h3>Aucune photo importée</h3>
-                        <p>Commencez par importer des photos de votre chantier</p>
+                <div class="photos-container">
+                    <div class="sort-controls">
+                        <button class="sort-button" onclick="sortPhotos('stepNumber')">
+                            <i class="fas fa-sort-numeric-down"></i> Numéro d'étape
+                        </button>
+                        <button class="sort-button" onclick="sortPhotos('date')">
+                            <i class="fas fa-calendar-alt"></i> Date
+                        </button>
+                        <button class="sort-button" onclick="sortPhotos('category')">
+                            <i class="fas fa-folder"></i> Catégorie
+                        </button>
+                    </div>
+                    <div id="photosContainer">
+                        <div class="empty-state">
+                            <i class="fas fa-camera"></i>
+                            <h3>Aucune photo importée</h3>
+                            <p>Commencez par importer des photos de votre chantier ou prenez-en directement avec l'appareil photo</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -729,9 +1071,9 @@
             <div class="export-section" id="exportSection" style="display: none;">
                 <div class="photo-count" id="photoCount">0 photos importées</div>
                 <button class="export-button" id="exportButton" onclick="exportToPDF()">
-                    📄 Exporter en PDF
+                    <i class="fas fa-file-pdf"></i> Générer le rapport PDF
                 </button>
-                <div style="margin-top: 15px; color: #7f8c8d; font-size: 0.9em;">
+                <div class="validation-check">
                     <input type="checkbox" id="validateFields" checked>
                     <label for="validateFields">Vérifier que tous les champs sont remplis</label>
                 </div>
@@ -739,7 +1081,10 @@
 
             <div class="loading" id="loadingSection">
                 <div class="spinner"></div>
-                <p>Génération du PDF en cours...</p>
+                <p>Génération du rapport en cours...</p>
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -748,19 +1093,22 @@
     <div id="cameraModal" class="camera-modal">
         <div class="camera-container">
             <div class="camera-header">
-                <h3>Prendre une photo</h3>
+                <h3><i class="fas fa-camera"></i> Appareil photo</h3>
                 <button class="close-camera" onclick="closeCamera()">×</button>
             </div>
             <div class="camera-preview">
                 <video id="cameraFeed" autoplay playsinline></video>
-                <button class="camera-switch" id="switchCamera">Changer de caméra</button>
+                <div class="photo-counter" id="photoCounter">0 photo(s)</div>
+                <button class="camera-switch" id="switchCamera">
+                    <i class="fas fa-sync-alt"></i> Changer de caméra
+                </button>
             </div>
             <div class="camera-controls">
                 <button class="camera-btn capture-btn" id="captureButton">
-                    Prendre la photo
+                    <i class="fas fa-camera"></i> Prendre la photo
                 </button>
                 <button class="camera-btn cancel-btn" onclick="closeCamera()">
-                    Annuler
+                    <i class="fas fa-times"></i> Annuler
                 </button>
             </div>
         </div>
@@ -776,14 +1124,92 @@
         let currentCamera = 'user'; // 'user' pour frontal, 'environment' pour arrière
 
         const categories = [
-            { id: 'etat_initial', name: 'État initial', description: 'Photos de l\'état initial' },
-            { id: 'fire_detection', name: 'Fire Detection', description: 'Système de détection incendie' },
-            { id: 'first_functional_test', name: 'First Functional Test', description: 'Premier test fonctionnel' },
-            { id: 'increasing_electrical_charge', name: 'Increasing Electrical Charge ', description: 'Augmentation charge électrique ' },
-            { id: 'loss_crah_redundancy', name: 'Loss of CRAH redundancy in RMU', description: 'Perte de redondance CRAH dans RMU' },
-            { id: 'power_failure_crah', name: 'Power failure of CRAH-C and Loss of CRAC', description: 'Panne d\'alimentation CRAH-C et perte CRAC' },
-            { id: 'probes_loss_test', name: 'Probes Loss Test', description: 'Test de perte de sondes' }
+            { id: 'etat_initial', name: 'État initial', icon: 'fas fa-flag', description: 'Photos de l\'état initial du chantier' },
+            { id: 'fire_detection', name: 'Fire Detection', icon: 'fas fa-fire-extinguisher', description: 'Système de détection incendie' },
+            { id: 'first_functional_test', name: 'First Functional Test', icon: 'fas fa-wrench', description: 'Premier test fonctionnel des équipements' },
+            { id: 'increasing_electrical_charge', name: 'Increasing Electrical Charge', icon: 'fas fa-bolt', description: 'Augmentation progressive de la charge électrique' },
+            { id: 'loss_crah_redundancy', name: 'Loss of CRAH redundancy', icon: 'fas fa-server', description: 'Perte de redondance CRAH dans RMU' },
+            { id: 'power_failure_crah', name: 'Power failure of CRAH-C', icon: 'fas fa-plug', description: 'Panne d\'alimentation CRAH-C et perte CRAC' },
+            { id: 'probes_loss_test', name: 'Probes Loss Test', icon: 'fas fa-thermometer-half', description: 'Test de perte de sondes' }
         ];
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            const photoInput = document.getElementById('photoInput');
+            const uploadSection = document.getElementById('uploadSection');
+            const captureButton = document.getElementById('captureButton');
+            const switchButton = document.getElementById('switchCamera');
+
+            photoInput.addEventListener('change', handleFileSelect);
+            
+            // Drag & Drop
+            uploadSection.addEventListener('dragover', handleDragOver);
+            uploadSection.addEventListener('dragleave', handleDragLeave);
+            uploadSection.addEventListener('drop', handleDrop);
+            
+            // Événements pour la caméra
+            if (captureButton) captureButton.addEventListener('click', capturePhoto);
+            if (switchButton) switchButton.addEventListener('click', switchCamera);
+
+            // Charger les données sauvegardées
+            loadSavedData();
+            
+            renderCategories();
+        });
+
+        // Fonction pour charger les données sauvegardées
+        function loadSavedData() {
+            const savedPhotos = localStorage.getItem('chantierPhotos');
+            const savedProjectInfo = localStorage.getItem('chantierProjectInfo');
+            
+            if (savedPhotos) {
+                photos = JSON.parse(savedPhotos);
+                photoCounter = photos.length > 0 ? Math.max(...photos.map(p => p.id)) : 0;
+                updatePhotoCount();
+                if (photos.length > 0) {
+                    document.getElementById('exportSection').style.display = 'block';
+                }
+            }
+            
+            if (savedProjectInfo) {
+                const projectInfo = JSON.parse(savedProjectInfo);
+                document.getElementById('affaire').value = projectInfo.affaire || '';
+                document.getElementById('code').value = projectInfo.code || '';
+                document.getElementById('agence').value = projectInfo.agence || '';
+                document.getElementById('rapportType').value = projectInfo.rapportType || '';
+                document.getElementById('essais').value = projectInfo.essais || '';
+                document.getElementById('rmu').value = projectInfo.rmu || '';
+            }
+            
+            // Sauvegarder automatiquement quand les champs changent
+            document.querySelectorAll('.project-info-grid input').forEach(input => {
+                input.addEventListener('input', saveProjectInfo);
+            });
+        }
+
+        // Sauvegarder les informations du projet
+        function saveProjectInfo() {
+            const projectInfo = {
+                affaire: document.getElementById('affaire').value,
+                code: document.getElementById('code').value,
+                agence: document.getElementById('agence').value,
+                rapportType: document.getElementById('rapportType').value,
+                essais: document.getElementById('essais').value,
+                rmu: document.getElementById('rmu').value
+            };
+            
+            localStorage.setItem('chantierProjectInfo', JSON.stringify(projectInfo));
+        }
+
+        // Sauvegarder les photos
+        function savePhotos() {
+            const photosToSave = photos.map(photo => {
+                // Ne pas sauvegarder les dataUrl pour économiser de l'espace
+                const { dataUrl, ...rest } = photo;
+                return rest;
+            });
+            localStorage.setItem('chantierPhotos', JSON.stringify(photosToSave));
+        }
 
         // Fonctions globales
         function switchTab(tabName) {
@@ -819,6 +1245,7 @@
         async function openCamera() {
             const modal = document.getElementById('cameraModal');
             modal.style.display = 'flex';
+            document.getElementById('photoCounter').textContent = `${photos.length} photo(s)`;
             
             try {
                 // Démarrer la caméra
@@ -866,37 +1293,16 @@
             
             // Convertir en blob
             canvas.toBlob(async (blob) => {
-                const file = new File([blob], `photo-${new Date().toISOString().replace(/:/g, '-')}.jpg`, {
+                const file = new File([blob], `photo-chantier-${new Date().toISOString().replace(/:/g, '-')}.jpg`, {
                     type: 'image/jpeg',
                     lastModified: Date.now()
                 });
                 
                 await addPhoto(file);
-                closeCamera();
                 showToast('Photo ajoutée avec succès !');
+                document.getElementById('photoCounter').textContent = `${photos.length} photo(s)`;
             }, 'image/jpeg', 0.9);
         }
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            const photoInput = document.getElementById('photoInput');
-            const uploadSection = document.getElementById('uploadSection');
-            const captureButton = document.getElementById('captureButton');
-            const switchButton = document.getElementById('switchCamera');
-
-            photoInput.addEventListener('change', handleFileSelect);
-            
-            // Drag & Drop
-            uploadSection.addEventListener('dragover', handleDragOver);
-            uploadSection.addEventListener('dragleave', handleDragLeave);
-            uploadSection.addEventListener('drop', handleDrop);
-            
-            // Événements pour la caméra
-            if (captureButton) captureButton.addEventListener('click', capturePhoto);
-            if (switchButton) switchButton.addEventListener('click', switchCamera);
-
-            renderCategories();
-        });
 
         function renderCategories() {
             const container = document.getElementById('categoriesGrid');
@@ -910,12 +1316,14 @@
                     <div class="category-card ${categoryPhotos.length > 0 ? 'selected' : ''}" 
                          onclick="selectCategory('${category.id}')">
                         <div class="category-header">
-                            <div class="category-title">${category.name}</div>
+                            <div class="category-title">
+                                <i class="${category.icon}"></i> ${category.name}
+                            </div>
                             <div class="category-count">${categoryPhotos.length}</div>
                         </div>
                         <div class="category-description">${category.description}</div>
                         <div class="category-photos ${categoryPhotos.length === 0 ? 'empty' : ''}">
-                            ${categoryPhotos.length === 0 ? 'Aucune photo' : thumbsHTML}
+                            ${categoryPhotos.length === 0 ? 'Aucune photo dans cette catégorie' : thumbsHTML}
                             ${categoryPhotos.length > 4 ? `<div style="color: #7f8c8d; font-size: 0.8em; align-self: center;">+${categoryPhotos.length - 4}</div>` : ''}
                         </div>
                     </div>
@@ -950,7 +1358,7 @@
             for (let file of files) {
                 if (file.type.startsWith('image/')) {
                     if (file.size > 5 * 1024 * 1024) {
-                        showToast('Fichier trop volumineux: ' + file.name, 'error');
+                        showToast(`Fichier trop volumineux (${(file.size/(1024*1024)).toFixed(1)} Mo): ${file.name}`, 'error');
                         continue;
                     }
                     await addPhoto(file);
@@ -983,13 +1391,23 @@
                         category: 'etat_initial',
                         stepNumber: photoCounter,
                         date: now.toISOString().split('T')[0],
-                        time: now.toTimeString().split(' ')[0].slice(0, 5)
+                        time: now.toTimeString().split(' ')[0].slice(0, 5),
+                        rotation: 0
                     };
                     photos.push(photo);
+                    savePhotos();
                     resolve();
                 };
                 reader.readAsDataURL(file);
             });
+        }
+
+        function rotatePhoto(photoId) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.rotation = (photo.rotation + 90) % 360;
+                renderPhotos();
+            }
         }
 
         function renderPhotos(filterCategory = null) {
@@ -1021,9 +1439,9 @@
             if (photos.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div style="font-size: 4em; margin-bottom: 20px;">📷</div>
+                        <i class="fas fa-camera"></i>
                         <h3>Aucune photo importée</h3>
-                        <p>Commencez par importer des photos de votre chantier</p>
+                        <p>Commencez par importer des photos de votre chantier ou prenez-en directement avec l'appareil photo</p>
                     </div>
                 `;
                 exportSection.style.display = 'none';
@@ -1035,7 +1453,7 @@
             if (photosToShow.length === 0 && filterCategory) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <div style="font-size: 4em; margin-bottom: 20px;">📂</div>
+                        <i class="fas fa-folder-open"></i>
                         <h3>Aucune photo dans cette catégorie</h3>
                         <p>Assignez des photos à cette catégorie ou importez-en de nouvelles</p>
                     </div>
@@ -1052,33 +1470,37 @@
                 return `
                     <div class="photo-item" data-id="${photo.id}">
                         <div class="photo-container">
-                            <img src="${photo.dataUrl}" alt="${photo.designation}" class="photo-img">
-                            <div class="category-badge">${categoryName}</div>
+                            <img src="${photo.dataUrl}" alt="${photo.designation}" 
+                                 class="photo-img" style="transform: rotate(${photo.rotation}deg);">
+                            <div class="category-badge">
+                                <i class="fas fa-folder"></i> ${categoryName}
+                            </div>
                             <div class="photo-controls">
-                                <button class="control-btn" onclick="removePhoto(${photo.id})" title="Supprimer">
-                                    ×
+                                <button class="control-btn rotate" title="Tourner" onclick="rotatePhoto(${photo.id})">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button class="control-btn delete" title="Supprimer" onclick="removePhoto(${photo.id})">
+                                    <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="photo-info">
                             <input type="text" value="${photo.designation}" 
-                                   placeholder="Désignation de la photo..." 
+                                   placeholder="Description de la photo..." 
                                    onchange="updateDesignation(${photo.id}, this.value)">
                             <select onchange="updateCategory(${photo.id}, this.value)">
+                                <option value="">Sélectionnez une catégorie</option>
                                 ${categoryOptions}
                             </select>
-                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                            <div class="photo-details">
                                 <input type="number" value="${photo.stepNumber}" 
                                        placeholder="N° étape" 
-                                       style="width: 30%; padding: 8px; border: 2px solid #ecf0f1; border-radius: 5px;"
                                        onchange="updateStepNumber(${photo.id}, this.value)"
                                        required>
                                 <input type="date" value="${photo.date}" 
-                                       style="width: 35%; padding: 8px; border: 2px solid #ecf0f1; border-radius: 5px;"
                                        onchange="updateDate(${photo.id}, this.value)"
                                        required>
                                 <input type="time" value="${photo.time}" 
-                                       style="width: 35%; padding: 8px; border: 2px solid #ecf0f1; border-radius: 5px;"
                                        onchange="updateTime(${photo.id}, this.value)"
                                        required>
                             </div>
@@ -1088,10 +1510,10 @@
             }).join('');
 
             container.innerHTML = `
-                <div class="sort-info" style="margin-bottom: 15px; font-style: italic; color: #7f8c8d;">
-                    Trié par: ${currentSort === 'stepNumber' ? 'Numéro d\'étape' : 
+                <div class="sort-info" style="margin-bottom: 20px; font-style: italic; color: var(--gray); padding: 0 10px;">
+                    <i class="fas fa-sort"></i> Trié par: ${currentSort === 'stepNumber' ? 'Numéro d\'étape' : 
                                currentSort === 'date' ? 'Date et heure' : 
-                               'Catégorie'}
+                               'Catégorie'} | ${photosToShow.length} photo(s)
                 </div>
                 <div class="photos-grid">${photosHTML}</div>
             `;
@@ -1101,6 +1523,7 @@
             const photo = photos.find(p => p.id === photoId);
             if (photo) {
                 photo.designation = newDesignation;
+                savePhotos();
             }
         }
 
@@ -1108,6 +1531,7 @@
             const photo = photos.find(p => p.id === photoId);
             if (photo) {
                 photo.category = newCategory;
+                savePhotos();
                 renderPhotos();
                 renderCategories();
             }
@@ -1117,6 +1541,7 @@
             const photo = photos.find(p => p.id === photoId);
             if (photo) {
                 photo.stepNumber = parseInt(newStepNumber) || 0;
+                savePhotos();
             }
         }
 
@@ -1124,6 +1549,7 @@
             const photo = photos.find(p => p.id === photoId);
             if (photo) {
                 photo.date = newDate;
+                savePhotos();
             }
         }
 
@@ -1131,14 +1557,18 @@
             const photo = photos.find(p => p.id === photoId);
             if (photo) {
                 photo.time = newTime;
+                savePhotos();
             }
         }
 
         function removePhoto(photoId) {
-            photos = photos.filter(p => p.id !== photoId);
-            renderPhotos();
-            renderCategories();
-            updatePhotoCount();
+            if (confirm('Voulez-vous vraiment supprimer cette photo ?')) {
+                photos = photos.filter(p => p.id !== photoId);
+                savePhotos();
+                renderPhotos();
+                renderCategories();
+                updatePhotoCount();
+            }
         }
 
         function updatePhotoCount() {
@@ -1150,15 +1580,18 @@
 
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
-            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
-            toast.textContent = message;
+            toast.className = `toast ${type === 'error' ? 'error' : type === 'warning' ? 'warning' : ''}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
+                <span>${message}</span>
+            `;
             document.body.appendChild(toast);
             
             setTimeout(() => toast.classList.add('show'), 10);
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => document.body.removeChild(toast), 300);
-            }, 3000);
+            }, 4000);
         }
 
         function validatePhotoFields() {
@@ -1183,12 +1616,20 @@
                         input.style.borderColor = '#e74c3c';
                         hasMissing = true;
                     } else {
-                        input.style.borderColor = '#ecf0f1';
+                        input.style.borderColor = '';
                     }
                 });
                 
+                const select = item.querySelector('select');
+                if (!select.value) {
+                    select.style.borderColor = '#e74c3c';
+                    hasMissing = true;
+                } else {
+                    select.style.borderColor = '';
+                }
+                
                 if (hasMissing) {
-                    item.style.boxShadow = '0 0 0 2px #e74c3c';
+                    item.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.3)';
                 } else {
                     item.style.boxShadow = '';
                 }
@@ -1213,11 +1654,11 @@
 
             const loadingSection = document.getElementById('loadingSection');
             const exportButton = document.getElementById('exportButton');
+            const progressBar = document.getElementById('progressBar');
             
             loadingSection.style.display = 'block';
             exportButton.disabled = true;
-            exportButton.textContent = 'Génération en cours...';
-
+            
             try {
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF();
@@ -1228,7 +1669,10 @@
                 const footerHeight = 15;
                 const contentHeight = pageHeight - headerHeight - footerHeight - margin * 2;
                 const maxImageWidth = pageWidth - 2 * margin;
-                const maxImageHeight = contentHeight / 2 - 40; // Moitié de la hauteur moins l'espace pour le texte
+                const maxImageHeight = contentHeight / 2 - 40;
+
+                // Mise à jour de la barre de progression
+                progressBar.style.width = '10%';
 
                 // Fonction pour formater la date en JJ/MM/AAAA
                 const formatDate = (dateStr) => {
@@ -1264,23 +1708,30 @@
                 };
 
                 // Ajouter la page de titre
-                pdf.setFontSize(22);
-                pdf.setTextColor(40, 60, 100);
-                pdf.text('RAPPORT PHOTO ', pageWidth / 2, 40, { align: 'center' });
+                pdf.setFontSize(24);
+                pdf.setTextColor(25, 72, 78);
+                pdf.text('RAPPORT PHOTO CHANTIER', pageWidth / 2, 40, { align: 'center' });
                 
-                pdf.setFontSize(16);
-                pdf.setTextColor(70, 100, 150);
-                pdf.text('Informations du projet', pageWidth / 2, 60, { align: 'center' });
+                pdf.setFontSize(18);
+                pdf.setTextColor(41, 128, 185);
+                pdf.text(projectInfo.affaire, pageWidth / 2, 55, { align: 'center' });
+                
+                pdf.setFontSize(14);
+                pdf.setTextColor(52, 73, 94);
+                pdf.text('Informations du projet', pageWidth / 2, 75, { align: 'center' });
                 
                 pdf.setFontSize(12);
-                pdf.setTextColor(0);
-                let yPosition = 80;
+                pdf.setTextColor(44, 62, 80);
+                let yPosition = 90;
                 
                 // Afficher les informations du projet
                 Object.entries(projectInfo).forEach(([key, value], index) => {
                     const text = `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`;
                     pdf.text(text, pageWidth / 2, yPosition + index * 10, { align: 'center' });
                 });
+
+                // Mise à jour de la barre de progression
+                progressBar.style.width = '20%';
 
                 // Trier toutes les photos par catégorie et par numéro d'étape
                 let sortedPhotos = [];
@@ -1316,7 +1767,7 @@
                         const yStart = headerHeight + margin + j * (contentHeight / 2);
                         
                         // Afficher le bandeau de catégorie
-                        pdf.setFillColor(52, 152, 219);
+                        pdf.setFillColor(25, 72, 78);
                         pdf.rect(margin, yStart, pageWidth - 2 * margin, 15, 'F');
                         pdf.setTextColor(255);
                         pdf.setFontSize(11);
@@ -1356,6 +1807,9 @@
                         const infoText = `Étape: ${photo.stepNumber} | Date: ${formatDate(photo.date)} ${photo.time}`;
                         pdf.text(infoText, pageWidth / 2, yStart + 35 + imgHeight, { align: 'center' });
                     }
+
+                    // Mise à jour de la barre de progression
+                    progressBar.style.width = `${20 + (i+1)/groups.length*70}%`;
                 }
 
                 // Ajouter le pied de page à chaque page
@@ -1366,17 +1820,17 @@
                 }
 
                 // Générer le PDF
-                const fileName = `rapport-chantier-${projectInfo.affaire || 'sans-nom'}-${new Date().toISOString().slice(0, 10)}.pdf`;
+                const fileName = `rapport-photos-${projectInfo.affaire || 'chantier'}-${new Date().toISOString().slice(0, 10)}.pdf`;
                 pdf.save(fileName);
                 
-                showToast('PDF généré avec succès !');
+                showToast('Rapport PDF généré avec succès !');
             } catch (error) {
                 console.error('Erreur lors de la génération du PDF:', error);
                 showToast('Erreur lors de la génération du PDF', 'error');
             } finally {
                 loadingSection.style.display = 'none';
                 exportButton.disabled = false;
-                exportButton.textContent = '📄 Exporter en PDF';
+                progressBar.style.width = '0';
             }
         }
     </script>
