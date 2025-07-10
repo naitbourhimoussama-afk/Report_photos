@@ -768,10 +768,10 @@
         let currentCamera = 'user'; // 'user' pour frontal, 'environment' pour arrière
 
         const categories = [
-            { id: 'etat_initial', name: 'État initial', description: 'Photos de l\'état initial du chantier' },
+            { id: 'etat_initial', name: 'État initial', description: 'Photos de l\'état initial' },
             { id: 'fire_detection', name: 'Fire Detection', description: 'Système de détection incendie' },
             { id: 'first_functional_test', name: 'First Functional Test', description: 'Premier test fonctionnel' },
-            { id: 'increasing_electrical_charge', name: 'Increasing Electrical Charge by RMU', description: 'Augmentation charge électrique par RMU' },
+            { id: 'increasing_electrical_charge', name: 'Increasing Electrical Charge ', description: 'Augmentation charge électrique ' },
             { id: 'loss_crah_redundancy', name: 'Loss of CRAH redundancy in RMU', description: 'Perte de redondance CRAH dans RMU' },
             { id: 'power_failure_crah', name: 'Power failure of CRAH-C and Loss of CRAC', description: 'Panne d\'alimentation CRAH-C et perte CRAC' },
             { id: 'probes_loss_test', name: 'Probes Loss Test', description: 'Test de perte de sondes' }
@@ -1258,7 +1258,7 @@
                 // Ajouter la page de titre
                 pdf.setFontSize(22);
                 pdf.setTextColor(40, 60, 100);
-                pdf.text('RAPPORT PHOTO CHANTIER', pageWidth / 2, 40, { align: 'center' });
+                pdf.text('RAPPORT PHOTO ', pageWidth / 2, 40, { align: 'center' });
                 
                 pdf.setFontSize(16);
                 pdf.setTextColor(70, 100, 150);
