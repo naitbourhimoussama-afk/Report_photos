@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rapport Photo Chantier</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .project-info-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px solid #3498db;
+        }
+
+        .project-info-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .project-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .info-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-field label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+
+        .info-field input {
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .info-field input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #3498db;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #2980b9;
+            background: #ecf0f1;
+        }
+
+        .upload-section.dragover {
+            border-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .upload-button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .categories-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .categories-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 2px solid #ecf0f1;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .category-card:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .category-card.selected {
+            border-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .category-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .category-count {
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            min-width: 25px;
+            text-align: center;
+        }
+
+        .category-card.selected .category-count {
+            background: #27ae60;
+        }
+
+        .category-description {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+
+        .category-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            min-height: 60px;
+            border: 1px dashed #bdc3c7;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .category-photos.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #95a5a6;
+            font-style: italic;
+        }
+
+        .category-thumb {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            object-fit: cover;
+            border: 2px solid #ecf0f1;
+        }
+
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .photo-item {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .photo-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .photo-container {
+            position: relative;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .photo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .photo-item:hover .photo-img {
+            transform: scale(1.05);
+        }
+
+        .photo-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .control-btn {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(231, 76, 60, 0.9);
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .photo-info {
+            padding: 20px;
+        }
+
+        .photo-info input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .photo-info input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .photo-info select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+
+        .photo-info select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .export-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .export-button {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .export-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(39, 174, 96, 0.4);
+        }
+
+        .export-button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .photo-count {
+            font-size: 1.1em;
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #3498db;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #ecf0f1;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #27ae60;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1em;
+            color: #7f8c8d;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .sort-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .sort-button {
+            background: #ecf0f1;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sort-button.active {
+            background: #3498db;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .photos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                text-align: center;
+            }
+            
+            .sort-controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 Rapport Photo Chantier</h1>
+            <p>Organisez vos photos par catégories et exportez en PDF</p>
+        </div>
+
+        <div class="content">
+            <!-- Section informations du projet -->
+            <div class="project-info-section">
+                <h3 class="project-info-title">📋 Informations du projet</h3>
+                <div class="project-info-grid">
+                    <div class="info-field">
+                        <label for="affaire">Affaire :</label>
+                        <input type="text" id="affaire" placeholder="Ex: GLOBAL SWITCH - CAMPUS PARIS CLICHY - PAR_E">
+                    </div>
+                    <div class="info-field">
+                        <label for="code">Code :</label>
+                        <input type="text" id="code" placeholder="Ex: P 1 1 8 6">
+                    </div>
+                    <div class="info-field">
+                        <label for="agence">Agence :</label>
+                        <input type="text" id="agence" placeholder="Ex: Agence Génie Climatique">
+                    </div>
+                    <div class="info-field">
+                        <label for="rapportType">Type de rapport :</label>
+                        <input type="text" id="rapportType" placeholder="Ex: Rapport Photo IHM">
+                    </div>
+                    <div class="info-field">
+                        <label for="essais">Essais :</label>
+                        <input type="text" id="essais" placeholder="Ex: ESSAIS L4">
+                    </div>
+                    <div class="info-field">
+                        <label for="rmu">RMU :</label>
+                        <input type="text" id="rmu" placeholder="Ex: HV/LV RMU L3D">
+                    </div>
+                </div>
+            </div>
+
+            <div class="upload-section" id="uploadSection">
+                <h3>📁 Importer des photos</h3>
+                <p>Glissez-déposez vos photos ici ou cliquez pour les sélectionner</p>
+                <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
+                <button class="upload-button" onclick="document.getElementById('photoInput').click()">
+                    Choisir des photos
+                </button>
+                <p style="margin-top: 10px; font-size: 0.9em; color: #7f8c8d;">
+                    Formats acceptés : JPG, PNG, GIF • Taille max : 5MB par photo
+                </p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('categories')">📋 Catégories</button>
+                <button class="tab" onclick="switchTab('photos')">🖼️ Toutes les photos</button>
+            </div>
+
+            <div id="categoriesTab" class="tab-content active">
+                <div class="categories-section">
+                    <h3 class="categories-title">🗂️ Organisez vos photos par catégories</h3>
+                    <div class="categories-grid" id="categoriesGrid"></div>
+                </div>
+            </div>
+
+            <div id="photosTab" class="tab-content">
+                <div class="sort-controls">
+                    <button class="sort-button" onclick="sortPhotos('stepNumber')">Trier par numéro d'étape</button>
+                    <button class="sort-button" onclick="sortPhotos('date')">Trier par date</button>
+                    <button class="sort-button" onclick="sortPhotos('category')">Trier par catégorie</button>
+                </div>
+                <div id="photosContainer">
+                    <div class="empty-state">
+                        <div style="font-size: 4em; margin-bottom: 20px;">📷</div>
+                        <h3>Aucune photo importée</h3>
+                        <p>Commencez par importer des photos de votre chantier</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="export-section" id="exportSection" style="display: none;">
+                <div class="photo-count" id="photoCount">0 photos importées</div>
+                <button class="export-button" id="exportButton" onclick="exportToPDF()">
+                    📄 Exporter en PDF
+                </button>
+                <div style="margin-top: 15px; color: #7f8c8d; font-size: 0.9em;">
+                    <input type="checkbox" id="validateFields" checked>
+                    <label for="validateFields">Vérifier que tous les champs sont remplis</label>
+                </div>
+            </div>
+
+            <div class="loading" id="loadingSection">
+                <div class="spinner"></div>
+                <p>Génération du PDF en cours...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let photos = [];
+        let photoCounter = 0;
+        let activeTab = 'categories';
+        let currentSort = 'stepNumber';
+
+        const categories = [
+            { id: 'etat_initial', name: 'État initial', description: 'Photos de l\'état initial du chantier' },
+            { id: 'fire_detection', name: 'Fire Detection', description: 'Système de détection incendie' },
+            { id: 'first_functional_test', name: 'First Functional Test', description: 'Premier test fonctionnel' },
+            { id: 'increasing_electrical_charge', name: 'Increasing Electrical Charge by RMU', description: 'Augmentation charge électrique par RMU' },
+            { id: 'loss_crah_redundancy', name: 'Loss of CRAH redundancy in RMU', description: 'Perte de redondance CRAH dans RMU' },
+            { id: 'power_failure_crah', name: 'Power failure of CRAH-C and Loss of CRAC', description: 'Panne d\'alimentation CRAH-C et perte CRAC' },
+            { id: 'probes_loss_test', name: 'Probes Loss Test', description: 'Test de perte de sondes' }
+        ];
+
+        // Fonctions globales
+        function switchTab(tabName) {
+            activeTab = tabName;
+            
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            if (tabName === 'photos') {
+                renderPhotos();
+            } else if (tabName === 'categories') {
+                renderCategories();
+            }
+        }
+
+        function selectCategory(categoryId) {
+            switchTab('photos');
+            renderPhotos(categoryId);
+        }
+
+        function sortPhotos(criteria) {
+            currentSort = criteria;
+            document.querySelectorAll('.sort-button').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.includes(criteria));
+            });
+            renderPhotos();
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            const photoInput = document.getElementById('photoInput');
+            const uploadSection = document.getElementById('uploadSection');
+
+            photoInput.addEventListener('change', handleFileSelect);
+            
+            // Drag & Drop
+            uploadSection.addEventListener('dragover', handleDragOver);
+            uploadSection.addEventListener('dragleave', handleDragLeave);
+            uploadSection.addEventListener('drop', handleDrop);
+
+            renderCategories();
+        });
+
+        function renderCategories() {
+            const container = document.getElementById('categoriesGrid');
+            const categoriesHTML = categories.map(category => {
+                const categoryPhotos = photos.filter(photo => photo.category === category.id);
+                const thumbsHTML = categoryPhotos.slice(0, 4).map(photo => 
+                    `<img src="${photo.dataUrl}" alt="${photo.designation}" class="category-thumb">`
+                ).join('');
+                
+                return `
+                    <div class="category-card ${categoryPhotos.length > 0 ? 'selected' : ''}" 
+                         onclick="selectCategory('${category.id}')">
+                        <div class="category-header">
+                            <div class="category-title">${category.name}</div>
+                            <div class="category-count">${categoryPhotos.length}</div>
+                        </div>
+                        <div class="category-description">${category.description}</div>
+                        <div class="category-photos ${categoryPhotos.length === 0 ? 'empty' : ''}">
+                            ${categoryPhotos.length === 0 ? 'Aucune photo' : thumbsHTML}
+                            ${categoryPhotos.length > 4 ? `<div style="color: #7f8c8d; font-size: 0.8em; align-self: center;">+${categoryPhotos.length - 4}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = categoriesHTML;
+        }
+
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            processFiles(files);
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            const files = event.dataTransfer.files;
+            processFiles(files);
+        }
+
+        async function processFiles(files) {
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        showToast('Fichier trop volumineux: ' + file.name, 'error');
+                        continue;
+                    }
+                    await addPhoto(file);
+                } else {
+                    showToast('Format non supporté: ' + file.name, 'error');
+                }
+            }
+            
+            if (activeTab === 'photos') {
+                renderPhotos();
+            } else {
+                renderCategories();
+            }
+            
+            updatePhotoCount();
+            document.getElementById('exportSection').style.display = 'block';
+        }
+
+        function addPhoto(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const now = new Date();
+                    const photo = {
+                        id: ++photoCounter,
+                        file: file,
+                        dataUrl: e.target.result,
+                        designation: `Photo ${photoCounter}`,
+                        filename: file.name,
+                        category: 'etat_initial',
+                        stepNumber: photoCounter,
+                        date: now.toISOString().split('T')[0],
+                        time: now.toTimeString().split(' ')[0].slice(0, 5)
+                    };
+                    photos.push(photo);
+                    resolve();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderPhotos(filterCategory = null) {
+            const container = document.getElementById('photosContainer');
+            const exportSection = document.getElementById('exportSection');
+            
+            let photosToShow = [...photos];
+            
+            if (currentSort === 'stepNumber') {
+                photosToShow.sort((a, b) => a.stepNumber - b.stepNumber);
+            } else if (currentSort === 'date') {
+                photosToShow.sort((a, b) => {
+                    const dateA = new Date(a.date + 'T' + a.time);
+                    const dateB = new Date(b.date + 'T' + b.time);
+                    return dateA - dateB;
+                });
+            } else if (currentSort === 'category') {
+                photosToShow.sort((a, b) => {
+                    const catA = categories.find(c => c.id === a.category)?.name || '';
+                    const catB = categories.find(c => c.id === b.category)?.name || '';
+                    return catA.localeCompare(catB);
+                });
+            }
+            
+            if (filterCategory) {
+                photosToShow = photosToShow.filter(photo => photo.category === filterCategory);
+            }
+            
+            if (photos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 4em; margin-bottom: 20px;">📷</div>
+                        <h3>Aucune photo importée</h3>
+                        <p>Commencez par importer des photos de votre chantier</p>
+                    </div>
+                `;
+                exportSection.style.display = 'none';
+                return;
+            }
+
+            exportSection.style.display = 'block';
+            
+            if (photosToShow.length === 0 && filterCategory) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 4em; margin-bottom: 20px;">📂</div>
+                        <h3>Aucune photo dans cette catégorie</h3>
+                        <p>Assignez des photos à cette catégorie ou importez-en de nouvelles</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const photosHTML = photosToShow.map(photo => {
+                const categoryName = categories.find(cat => cat.id === photo.category)?.name || 'Non assignée';
+                const categoryOptions = categories.map(cat => 
+                    `<option value="${cat.id}" ${photo.category === cat.id ? 'selected' : ''}>${cat.name}</option>`
+                ).join('');
+                
+                return `
+                    <div class="photo-item" data-id="${photo.id}">
+                        <div class="photo-container">
+                            <img src="${photo.dataUrl}" alt="${photo.designation}" class="photo-img">
+                            <div class="category-badge">${categoryName}</div>
+                            <div class="photo-controls">
+                                <button class="control-btn" onclick="removePhoto(${photo.id})" title="Supprimer">
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+                        <div class="photo-info">
+                            <input type="text" value="${photo.designation}" 
+                                   placeholder="Désignation de la photo..." 
+                                   onchange="updateDesignation(${photo.id}, this.value)">
+                            <select onchange="updateCategory(${photo.id}, this.value)">
+                                ${categoryOptions}
+                            </select>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <input type="number" value="${photo.stepNumber}" 
+                                       placeholder="N° étape" 
+                                       style="width: 30%; padding: 8px; border: 2px solid #ecf0f1; border-radius: 5px;"
+                                       onchange="updateStepNumber(${photo.id}, this.value)"
+                                       required>
+                                <input type="date" value="${photo.date}" 
+                                       style="width: 35%; padding: 8px; border: 2px solid #ecf0f1; border-radius: 5px;"
+                                       onchange="updateDate(${photo.id}, this.value)"
+                                       required>
+                                <input type="time" value="${photo.time}" 
+                                       style="width: 35%; padding: 8px; border: 2px solid #ecf0f1; border-radius: 5px;"
+                                       onchange="updateTime(${photo.id}, this.value)"
+                                       required>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="sort-info" style="margin-bottom: 15px; font-style: italic; color: #7f8c8d;">
+                    Trié par: ${currentSort === 'stepNumber' ? 'Numéro d\'étape' : 
+                               currentSort === 'date' ? 'Date et heure' : 
+                               'Catégorie'}
+                </div>
+                <div class="photos-grid">${photosHTML}</div>
+            `;
+        }
+
+        function updateDesignation(photoId, newDesignation) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.designation = newDesignation;
+            }
+        }
+
+        function updateCategory(photoId, newCategory) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.category = newCategory;
+                renderPhotos();
+                renderCategories();
+            }
+        }
+
+        function updateStepNumber(photoId, newStepNumber) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.stepNumber = parseInt(newStepNumber) || 0;
+            }
+        }
+
+        function updateDate(photoId, newDate) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.date = newDate;
+            }
+        }
+
+        function updateTime(photoId, newTime) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.time = newTime;
+            }
+        }
+
+        function removePhoto(photoId) {
+            photos = photos.filter(p => p.id !== photoId);
+            renderPhotos();
+            renderCategories();
+            updatePhotoCount();
+        }
+
+        function updatePhotoCount() {
+            const countElement = document.getElementById('photoCount');
+            if (countElement) {
+                countElement.textContent = `${photos.length} photo${photos.length > 1 ? 's' : ''} importée${photos.length > 1 ? 's' : ''}`;
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 3000);
+        }
+
+        function validatePhotoFields() {
+            for (const photo of photos) {
+                if (!photo.designation || !photo.category || 
+                    photo.stepNumber === undefined || isNaN(photo.stepNumber) || 
+                    !photo.date || !photo.time) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function highlightMissingFields() {
+            const photoItems = document.querySelectorAll('.photo-item');
+            photoItems.forEach(item => {
+                const inputs = item.querySelectorAll('input');
+                let hasMissing = false;
+                
+                inputs.forEach(input => {
+                    if (!input.value) {
+                        input.style.borderColor = '#e74c3c';
+                        hasMissing = true;
+                    } else {
+                        input.style.borderColor = '#ecf0f1';
+                    }
+                });
+                
+                if (hasMissing) {
+                    item.style.boxShadow = '0 0 0 2px #e74c3c';
+                } else {
+                    item.style.boxShadow = '';
+                }
+            });
+            
+            return false;
+        }
+
+        async function exportToPDF() {
+            if (photos.length === 0) {
+                showToast('Aucune photo à exporter', 'error');
+                return;
+            }
+
+            // Validation des champs
+            const validateFields = document.getElementById('validateFields').checked;
+            if (validateFields && !validatePhotoFields()) {
+                showToast('Veuillez remplir tous les champs pour chaque photo', 'error');
+                highlightMissingFields();
+                return;
+            }
+
+            const loadingSection = document.getElementById('loadingSection');
+            const exportButton = document.getElementById('exportButton');
+            
+            loadingSection.style.display = 'block';
+            exportButton.disabled = true;
+            exportButton.textContent = 'Génération en cours...';
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF();
+                const pageWidth = pdf.internal.pageSize.width;
+                const pageHeight = pdf.internal.pageSize.height;
+                const margin = 15;
+                const headerHeight = 15;
+                const footerHeight = 15;
+                const contentHeight = pageHeight - headerHeight - footerHeight - margin * 2;
+                const maxImageWidth = pageWidth - 2 * margin;
+                const maxImageHeight = contentHeight - 30;
+
+                // Fonction pour formater la date en JJ/MM/AAAA
+                const formatDate = (dateStr) => {
+                    if (!dateStr) return '';
+                    const [year, month, day] = dateStr.split('-');
+                    return `${day}/${month}/${year}`;
+                };
+
+                // Fonction pour ajouter un en-tête
+                const addHeader = (pdf, pageNumber) => {
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(100);
+                    pdf.text(`Rapport Photo Chantier - Page ${pageNumber}`, margin, 10);
+                };
+
+                // Fonction pour ajouter un pied de page
+                const addFooter = (pdf) => {
+                    pdf.setFontSize(9);
+                    pdf.setTextColor(100);
+                    const date = new Date().toLocaleDateString('fr-FR');
+                    pdf.text(`Généré le ${date}`, margin, pageHeight - 5);
+                    pdf.text(document.getElementById('agence').value || '', pageWidth - margin, pageHeight - 5, { align: 'right' });
+                };
+
+                // Récupérer les informations du projet
+                const projectInfo = {
+                    affaire: document.getElementById('affaire').value || 'Non renseigné',
+                    code: document.getElementById('code').value || 'Non renseigné',
+                    agence: document.getElementById('agence').value || 'Non renseigné',
+                    rapportType: document.getElementById('rapportType').value || 'Non renseigné',
+                    essais: document.getElementById('essais').value || 'Non renseigné',
+                    rmu: document.getElementById('rmu').value || 'Non renseigné'
+                };
+
+                // Ajouter la page de titre
+                pdf.setFontSize(22);
+                pdf.setTextColor(40, 60, 100);
+                pdf.text('RAPPORT PHOTO CHANTIER', pageWidth / 2, 40, { align: 'center' });
+                
+                pdf.setFontSize(16);
+                pdf.setTextColor(70, 100, 150);
+                pdf.text('Informations du projet', pageWidth / 2, 60, { align: 'center' });
+                
+                pdf.setFontSize(12);
+                pdf.setTextColor(0);
+                let yPosition = 80;
+                
+                // Afficher les informations du projet
+                Object.entries(projectInfo).forEach(([key, value], index) => {
+                    const text = `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`;
+                    pdf.text(text, pageWidth / 2, yPosition + index * 10, { align: 'center' });
+                });
+
+                // Ajouter une nouvelle page pour les photos
+                pdf.addPage();
+                let currentPage = 1;
+                let currentY = headerHeight + margin;
+
+                // Parcourir les catégories pour ajouter le contenu
+                for (const category of categories) {
+                    const categoryPhotos = photos.filter(p => p.category === category.id);
+                    if (categoryPhotos.length > 0) {
+                        // Trier les photos par numéro d'étape
+                        const sortedPhotos = categoryPhotos.sort((a, b) => a.stepNumber - b.stepNumber);
+
+                        // Ajouter l'en-tête de catégorie
+                        addHeader(pdf, currentPage);
+                        pdf.setFontSize(16);
+                        pdf.setTextColor(40, 80, 120);
+                        pdf.text(category.name.toUpperCase(), pageWidth / 2, currentY, { align: 'center' });
+                        
+                        pdf.setFontSize(12);
+                        pdf.setTextColor(100);
+                        pdf.text(category.description, pageWidth / 2, currentY + 8, { align: 'center' });
+                        
+                        currentY += 25;
+
+                        for (const photo of sortedPhotos) {
+                            // Vérifier si besoin d'une nouvelle page
+                            if (currentY > pageHeight - footerHeight - 100) {
+                                pdf.addPage();
+                                currentPage++;
+                                currentY = headerHeight + margin;
+                                addHeader(pdf, currentPage);
+                            }
+
+                            // Charger l'image
+                            const img = new Image();
+                            img.src = photo.dataUrl;
+                            await new Promise((resolve) => {
+                                img.onload = resolve;
+                            });
+
+                            // Calculer les dimensions de l'image
+                            const ratio = img.width / img.height;
+                            let imgWidth = maxImageWidth * 0.8; // 80% de la largeur disponible
+                            let imgHeight = imgWidth / ratio;
+
+                            // Si l'image est trop haute, ajuster
+                            if (imgHeight > maxImageHeight) {
+                                imgHeight = maxImageHeight;
+                                imgWidth = imgHeight * ratio;
+                            }
+
+                            // Positionner l'image
+                            const xPosition = (pageWidth - imgWidth) / 2;
+                            
+                            // Ajouter un cadre autour de la photo
+                            pdf.setDrawColor(200);
+                            pdf.setLineWidth(0.5);
+                            pdf.rect(xPosition - 2, currentY - 2, imgWidth + 4, imgHeight + 4);
+                            
+                            pdf.addImage(img, 'JPEG', xPosition, currentY, imgWidth, imgHeight);
+                            
+                            // Ajouter les informations
+                            currentY += imgHeight + 5;
+                            
+                            pdf.setFontSize(11);
+                            pdf.setTextColor(0);
+                            pdf.text(photo.designation, pageWidth / 2, currentY, { align: 'center' });
+                            
+                            currentY += 7;
+                            
+                            pdf.setFontSize(10);
+                            pdf.setTextColor(100);
+                            const infoText = `Étape: ${photo.stepNumber} | Date: ${formatDate(photo.date)} ${photo.time}`;
+                            pdf.text(infoText, pageWidth / 2, currentY, { align: 'center' });
+                            
+                            currentY += 20;
+                        }
+                        
+                        // Espace entre les catégories
+                        currentY += 15;
+                    }
+                }
+
+                // Ajouter le pied de page à chaque page
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    addFooter(pdf);
+                }
+
+                // Générer le PDF
+                const fileName = `rapport-chantier-${projectInfo.affaire || 'sans-nom'}-${new Date().toISOString().slice(0, 10)}.pdf`;
+                pdf.save(fileName);
+                
+                showToast('PDF généré avec succès !');
+            } catch (error) {
+                console.error('Erreur lors de la génération du PDF:', error);
+                showToast('Erreur lors de la génération du PDF', 'error');
+            } finally {
+                loadingSection.style.display = 'none';
+                exportButton.disabled = false;
+                exportButton.textContent = '📄 Exporter en PDF';
+            }
+        }
+    </script>
+</body>
+</html>
