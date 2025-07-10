@@ -479,6 +479,118 @@
             color: white;
         }
 
+        /* Modal pour la caméra */
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .camera-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .camera-header h3 {
+            color: #2c3e50;
+            font-size: 1.3em;
+        }
+
+        .close-camera {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .camera-preview {
+            width: 100%;
+            height: 400px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        #cameraFeed {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .camera-btn {
+            padding: 12px 25px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .capture-btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .capture-btn:hover {
+            background: linear-gradient(135deg, #2980b9, #2573a7);
+        }
+
+        .cancel-btn {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .cancel-btn:hover {
+            background: #dce4e8;
+        }
+
+        .camera-switch {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
         @media (max-width: 768px) {
             .photos-grid {
                 grid-template-columns: 1fr;
@@ -510,6 +622,15 @@
             
             .sort-controls {
                 justify-content: center;
+            }
+            
+            .camera-container {
+                width: 95%;
+                padding: 15px;
+            }
+            
+            .camera-preview {
+                height: 300px;
             }
         }
     </style>
@@ -556,11 +677,16 @@
             <div class="upload-section" id="uploadSection">
                 <h3>📁 Importer des photos</h3>
                 <p>Glissez-déposez vos photos ici ou cliquez pour les sélectionner</p>
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+                    <button class="upload-button" onclick="document.getElementById('photoInput').click()">
+                        Choisir des photos
+                    </button>
+                    <button class="upload-button" onclick="openCamera()">
+                        📸 Prendre une photo
+                    </button>
+                </div>
                 <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
-                <button class="upload-button" onclick="document.getElementById('photoInput').click()">
-                    Choisir des photos
-                </button>
-                <p style="margin-top: 10px; font-size: 0.9em; color: #7f8c8d;">
+                <p style="margin-top: 15px; font-size: 0.9em; color: #7f8c8d;">
                     Formats acceptés : JPG, PNG, GIF • Taille max : 5MB par photo
                 </p>
             </div>
@@ -610,12 +736,36 @@
         </div>
     </div>
 
+    <!-- Modal pour la caméra -->
+    <div id="cameraModal" class="camera-modal">
+        <div class="camera-container">
+            <div class="camera-header">
+                <h3>Prendre une photo</h3>
+                <button class="close-camera" onclick="closeCamera()">×</button>
+            </div>
+            <div class="camera-preview">
+                <video id="cameraFeed" autoplay playsinline></video>
+                <button class="camera-switch" id="switchCamera">Changer de caméra</button>
+            </div>
+            <div class="camera-controls">
+                <button class="camera-btn capture-btn" id="captureButton">
+                    Prendre la photo
+                </button>
+                <button class="camera-btn cancel-btn" onclick="closeCamera()">
+                    Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Variables globales
         let photos = [];
         let photoCounter = 0;
         let activeTab = 'categories';
         let currentSort = 'stepNumber';
+        let stream = null;
+        let currentCamera = 'user'; // 'user' pour frontal, 'environment' pour arrière
 
         const categories = [
             { id: 'etat_initial', name: 'État initial', description: 'Photos de l\'état initial du chantier' },
@@ -657,10 +807,74 @@
             renderPhotos();
         }
 
+        // Fonctions pour la caméra
+        async function openCamera() {
+            const modal = document.getElementById('cameraModal');
+            modal.style.display = 'flex';
+            
+            try {
+                // Démarrer la caméra
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: currentCamera,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                const video = document.getElementById('cameraFeed');
+                video.srcObject = stream;
+            } catch (err) {
+                console.error('Erreur d\'accès à la caméra:', err);
+                showToast('Impossible d\'accéder à la caméra', 'error');
+                closeCamera();
+            }
+        }
+
+        function closeCamera() {
+            const modal = document.getElementById('cameraModal');
+            modal.style.display = 'none';
+            
+            // Arrêter le flux vidéo
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        function switchCamera() {
+            currentCamera = currentCamera === 'user' ? 'environment' : 'user';
+            closeCamera();
+            setTimeout(openCamera, 300);
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraFeed');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convertir en blob
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], `photo-${new Date().toISOString().replace(/:/g, '-')}.jpg`, {
+                    type: 'image/jpeg',
+                    lastModified: Date.now()
+                });
+                
+                await addPhoto(file);
+                closeCamera();
+                showToast('Photo ajoutée avec succès !');
+            }, 'image/jpeg', 0.9);
+        }
+
         // Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             const photoInput = document.getElementById('photoInput');
             const uploadSection = document.getElementById('uploadSection');
+            const captureButton = document.getElementById('captureButton');
+            const switchButton = document.getElementById('switchCamera');
 
             photoInput.addEventListener('change', handleFileSelect);
             
@@ -668,6 +882,10 @@
             uploadSection.addEventListener('dragover', handleDragOver);
             uploadSection.addEventListener('dragleave', handleDragLeave);
             uploadSection.addEventListener('drop', handleDrop);
+            
+            // Événements pour la caméra
+            if (captureButton) captureButton.addEventListener('click', capturePhoto);
+            if (switchButton) switchButton.addEventListener('click', switchCamera);
 
             renderCategories();
         });
@@ -1002,7 +1220,7 @@
                 const footerHeight = 15;
                 const contentHeight = pageHeight - headerHeight - footerHeight - margin * 2;
                 const maxImageWidth = pageWidth - 2 * margin;
-                const maxImageHeight = contentHeight - 30;
+                const maxImageHeight = contentHeight / 2 - 40; // Moitié de la hauteur moins l'espace pour le texte
 
                 // Fonction pour formater la date en JJ/MM/AAAA
                 const formatDate = (dateStr) => {
@@ -1056,86 +1274,79 @@
                     pdf.text(text, pageWidth / 2, yPosition + index * 10, { align: 'center' });
                 });
 
-                // Ajouter une nouvelle page pour les photos
-                pdf.addPage();
-                let currentPage = 1;
-                let currentY = headerHeight + margin;
-
-                // Parcourir les catégories pour ajouter le contenu
+                // Trier toutes les photos par catégorie et par numéro d'étape
+                let sortedPhotos = [];
                 for (const category of categories) {
-                    const categoryPhotos = photos.filter(p => p.category === category.id);
-                    if (categoryPhotos.length > 0) {
-                        // Trier les photos par numéro d'étape
-                        const sortedPhotos = categoryPhotos.sort((a, b) => a.stepNumber - b.stepNumber);
+                    const categoryPhotos = photos.filter(p => p.category === category.id)
+                                                .sort((a, b) => a.stepNumber - b.stepNumber);
+                    sortedPhotos = sortedPhotos.concat(categoryPhotos);
+                }
 
-                        // Ajouter l'en-tête de catégorie
-                        addHeader(pdf, currentPage);
-                        pdf.setFontSize(16);
-                        pdf.setTextColor(40, 80, 120);
-                        pdf.text(category.name.toUpperCase(), pageWidth / 2, currentY, { align: 'center' });
+                // Diviser en groupes de 2 photos par page
+                const groups = [];
+                for (let i = 0; i < sortedPhotos.length; i += 2) {
+                    groups.push(sortedPhotos.slice(i, i + 2));
+                }
+
+                // Ajouter les pages de photos
+                for (let i = 0; i < groups.length; i++) {
+                    if (i > 0) {
+                        pdf.addPage();
+                    }
+                    
+                    const currentPage = pdf.internal.getNumberOfPages();
+                    addHeader(pdf, currentPage);
+                    
+                    const group = groups[i];
+                    
+                    // Pour chaque photo dans le groupe (1 ou 2 photos)
+                    for (let j = 0; j < group.length; j++) {
+                        const photo = group[j];
+                        const categoryName = categories.find(c => c.id === photo.category)?.name || 'Non assignée';
                         
-                        pdf.setFontSize(12);
-                        pdf.setTextColor(100);
-                        pdf.text(category.description, pageWidth / 2, currentY + 8, { align: 'center' });
+                        // Position verticale pour cette photo
+                        const yStart = headerHeight + margin + j * (contentHeight / 2);
                         
-                        currentY += 25;
+                        // Afficher le bandeau de catégorie
+                        pdf.setFillColor(52, 152, 219);
+                        pdf.rect(margin, yStart, pageWidth - 2 * margin, 15, 'F');
+                        pdf.setTextColor(255);
+                        pdf.setFontSize(11);
+                        pdf.text(categoryName, margin + 5, yStart + 10);
+                        
+                        // Charger l'image
+                        const img = new Image();
+                        img.src = photo.dataUrl;
+                        await new Promise((resolve) => {
+                            img.onload = resolve;
+                        });
 
-                        for (const photo of sortedPhotos) {
-                            // Vérifier si besoin d'une nouvelle page
-                            if (currentY > pageHeight - footerHeight - 100) {
-                                pdf.addPage();
-                                currentPage++;
-                                currentY = headerHeight + margin;
-                                addHeader(pdf, currentPage);
-                            }
-
-                            // Charger l'image
-                            const img = new Image();
-                            img.src = photo.dataUrl;
-                            await new Promise((resolve) => {
-                                img.onload = resolve;
-                            });
-
-                            // Calculer les dimensions de l'image
-                            const ratio = img.width / img.height;
-                            let imgWidth = maxImageWidth * 0.8; // 80% de la largeur disponible
-                            let imgHeight = imgWidth / ratio;
-
-                            // Si l'image est trop haute, ajuster
-                            if (imgHeight > maxImageHeight) {
-                                imgHeight = maxImageHeight;
-                                imgWidth = imgHeight * ratio;
-                            }
-
-                            // Positionner l'image
-                            const xPosition = (pageWidth - imgWidth) / 2;
-                            
-                            // Ajouter un cadre autour de la photo
-                            pdf.setDrawColor(200);
-                            pdf.setLineWidth(0.5);
-                            pdf.rect(xPosition - 2, currentY - 2, imgWidth + 4, imgHeight + 4);
-                            
-                            pdf.addImage(img, 'JPEG', xPosition, currentY, imgWidth, imgHeight);
-                            
-                            // Ajouter les informations
-                            currentY += imgHeight + 5;
-                            
-                            pdf.setFontSize(11);
-                            pdf.setTextColor(0);
-                            pdf.text(photo.designation, pageWidth / 2, currentY, { align: 'center' });
-                            
-                            currentY += 7;
-                            
-                            pdf.setFontSize(10);
-                            pdf.setTextColor(100);
-                            const infoText = `Étape: ${photo.stepNumber} | Date: ${formatDate(photo.date)} ${photo.time}`;
-                            pdf.text(infoText, pageWidth / 2, currentY, { align: 'center' });
-                            
-                            currentY += 20;
+                        // Calculer les dimensions de l'image
+                        const ratio = img.width / img.height;
+                        let imgWidth = maxImageWidth;
+                        let imgHeight = imgWidth / ratio;
+                        
+                        // Ajuster si l'image est trop haute
+                        if (imgHeight > maxImageHeight) {
+                            imgHeight = maxImageHeight;
+                            imgWidth = imgHeight * ratio;
                         }
                         
-                        // Espace entre les catégories
-                        currentY += 15;
+                        // Centrer l'image horizontalement
+                        const xPosition = margin + (maxImageWidth - imgWidth) / 2;
+                        
+                        // Ajouter l'image
+                        pdf.addImage(img, 'JPEG', xPosition, yStart + 20, imgWidth, imgHeight);
+                        
+                        // Ajouter les informations sous l'image
+                        pdf.setTextColor(0);
+                        pdf.setFontSize(11);
+                        pdf.text(photo.designation, pageWidth / 2, yStart + 30 + imgHeight, { align: 'center' });
+                        
+                        pdf.setFontSize(10);
+                        pdf.setTextColor(100);
+                        const infoText = `Étape: ${photo.stepNumber} | Date: ${formatDate(photo.date)} ${photo.time}`;
+                        pdf.text(infoText, pageWidth / 2, yStart + 35 + imgHeight, { align: 'center' });
                     }
                 }
 
