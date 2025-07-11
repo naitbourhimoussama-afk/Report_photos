@@ -442,6 +442,17 @@
             border-color: var(--primary);
         }
 
+        .sort-button.clear {
+            background: var(--error);
+            color: white;
+            border-color: var(--error);
+        }
+
+        .sort-button.clear:hover {
+            background: #c0392b;
+            border-color: #c0392b;
+        }
+
         .photos-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -888,6 +899,84 @@
             font-size: 0.9rem;
         }
 
+        /* Modal pour choisir la catégorie */
+        .category-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .category-modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .category-modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .category-modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .category-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .category-option {
+            padding: 15px;
+            background: var(--light);
+            border: 1px solid var(--light-gray);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .category-option:hover {
+            background: var(--accent-light);
+            color: white;
+        }
+
+        .preview-container {
+            width: 100%;
+            height: 200px;
+            border: 1px dashed var(--primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #pendingPhotoPreview {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .category-modal-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
         @media (max-width: 1024px) {
             .photos-grid {
                 grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -1058,6 +1147,9 @@
                         <button class="sort-button" onclick="sortPhotos('category')">
                             <i class="fas fa-folder"></i> Catégorie
                         </button>
+                        <button class="sort-button clear" onclick="clearAllPhotos()">
+                            <i class="fas fa-trash-alt"></i> Vider toutes les images
+                        </button>
                     </div>
                     <div id="photosContainer">
                         <div class="empty-state">
@@ -1115,6 +1207,29 @@
         </div>
     </div>
 
+    <!-- Modal pour choisir la catégorie -->
+    <div id="categoryModal" class="category-modal">
+        <div class="category-modal-content">
+            <div class="category-modal-header">
+                <h3><i class="fas fa-folder"></i> Choisir une catégorie</h3>
+            </div>
+            <div class="category-modal-body">
+                <p>Sélectionnez la catégorie pour cette photo :</p>
+                <div class="category-options">
+                    <!-- Les boutons de catégorie seront générés ici -->
+                </div>
+                <div class="preview-container">
+                    <img id="pendingPhotoPreview" src="" alt="Aperçu de la photo">
+                </div>
+            </div>
+            <div class="category-modal-footer">
+                <button class="camera-btn cancel-btn" onclick="closeCategoryModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Variables globales
         let photos = [];
@@ -1123,6 +1238,7 @@
         let currentSort = 'stepNumber';
         let stream = null;
         let currentCamera = 'user'; // 'user' pour frontal, 'environment' pour arrière
+        let pendingPhoto = null; // Photo capturée en attente de catégorisation
 
         const categories = [
             { id: 'etat_initial', name: 'État initial', icon: 'fas fa-flag', description: 'Photos de l\'état initial du chantier' },
@@ -1242,6 +1358,25 @@
             renderPhotos();
         }
 
+        // Fonction pour vider toutes les photos
+        function clearAllPhotos() {
+            if (photos.length === 0) {
+                showToast('Il n\'y a aucune photo à supprimer', 'warning');
+                return;
+            }
+            
+            if (confirm('Voulez-vous vraiment supprimer toutes les photos ? Cette action est irréversible.')) {
+                photos = [];
+                photoCounter = 0;
+                savePhotos();
+                renderPhotos();
+                renderCategories();
+                updatePhotoCount();
+                document.getElementById('exportSection').style.display = 'none';
+                showToast('Toutes les photos ont été supprimées');
+            }
+        }
+
         // Fonctions pour la caméra
         async function openCamera() {
             const modal = document.getElementById('cameraModal');
@@ -1292,17 +1427,13 @@
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
-            // Convertir en blob
-            canvas.toBlob(async (blob) => {
-                const file = new File([blob], `photo-chantier-${new Date().toISOString().replace(/:/g, '-')}.jpg`, {
-                    type: 'image/jpeg',
-                    lastModified: Date.now()
-                });
-                
-                await addPhoto(file);
-                showToast('Photo ajoutée avec succès !');
-                document.getElementById('photoCounter').textContent = `${photos.length} photo(s)`;
-            }, 'image/jpeg', 0.9);
+            // Obtenir l'URL de données pour l'aperçu
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            pendingPhoto = { dataUrl: dataUrl };
+            
+            // Fermer la caméra et ouvrir la modale de catégorie
+            closeCamera();
+            openCategoryModal();
         }
 
         function renderCategories() {
@@ -1637,6 +1768,62 @@
             });
             
             return false;
+        }
+
+        // Fonctions pour la modale de catégorie
+        function openCategoryModal() {
+            const modal = document.getElementById('categoryModal');
+            modal.style.display = 'flex';
+            
+            // Afficher l'aperçu de la photo
+            const preview = document.getElementById('pendingPhotoPreview');
+            preview.src = pendingPhoto.dataUrl;
+            
+            // Générer les boutons de catégorie
+            const optionsContainer = document.querySelector('.category-options');
+            optionsContainer.innerHTML = '';
+            
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.className = 'category-option';
+                button.innerHTML = `<i class="${category.icon}"></i> ${category.name}`;
+                button.onclick = () => assignCategoryToPendingPhoto(category.id);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function closeCategoryModal() {
+            const modal = document.getElementById('categoryModal');
+            modal.style.display = 'none';
+            pendingPhoto = null;
+        }
+
+        function assignCategoryToPendingPhoto(categoryId) {
+            if (pendingPhoto) {
+                const now = new Date();
+                const photo = {
+                    id: ++photoCounter,
+                    dataUrl: pendingPhoto.dataUrl,
+                    designation: `Photo ${photoCounter}`,
+                    filename: `photo-${now.toISOString().slice(0,19).replace(/:/g,'-')}.jpg`,
+                    category: categoryId,
+                    stepNumber: photoCounter,
+                    date: now.toISOString().split('T')[0],
+                    time: now.toTimeString().split(' ')[0].slice(0,5),
+                    rotation: 0
+                };
+                
+                photos.push(photo);
+                savePhotos();
+                renderPhotos();
+                renderCategories();
+                updatePhotoCount();
+                
+                showToast('Photo ajoutée avec succès !');
+                document.getElementById('exportSection').style.display = 'block';
+                
+                closeCategoryModal();
+            }
         }
 
         async function exportToPDF() {
