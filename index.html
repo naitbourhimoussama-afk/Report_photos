@@ -6,7 +6,7 @@
     <title>Reportage Photos</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="manifest" href="/manifest.json">
+    
     <style>
         * {
             margin: 0;
@@ -38,10 +38,937 @@
             line-height: 1.6;
         }
 
-        /* [Tous vos autres styles CSS - conservez tout] */
-        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15); overflow: hidden; position: relative; border: 1px solid rgba(0, 0, 0, 0.05); }
-        .header { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: 30px; text-align: center; position: relative; overflow: hidden; }
-        /* ... [Continuez avec tous vos styles] ... */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+        }
+
+        .logo-container {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            height: 60px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .section-title i {
+            background: var(--primary);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .project-info-section {
+            background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-info-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2304243c' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            opacity: 0.05;
+        }
+
+        .project-info-title {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            color: white;
+            text-align: center;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .project-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .info-field {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .info-field label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--accent-light);
+            font-size: 0.95rem;
+        }
+
+        .info-field input {
+            padding: 14px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-field input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .info-field input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(95, 165, 134, 0.3);
+        }
+
+        .upload-section {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            margin-bottom: 30px;
+            border: 2px dashed var(--primary);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .upload-section:hover {
+            border-color: var(--accent);
+            background: #f5f9ff;
+        }
+
+        .upload-section.dragover {
+            border-color: var(--accent);
+            background: rgba(143, 201, 179, 0.1);
+        }
+
+        .upload-button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(25, 72, 78, 0.3);
+        }
+
+        .upload-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(25, 72, 78, 0.4);
+        }
+
+        .upload-button:active {
+            transform: translateY(0);
+        }
+
+        .upload-button i {
+            font-size: 1.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--light-gray);
+            position: relative;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--gray);
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .categories-section {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .category-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid var(--light-gray);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .category-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-card.selected {
+            border-color: var(--accent);
+            background: rgba(143, 201, 179, 0.05);
+            box-shadow: 0 0 0 3px rgba(95, 165, 134, 0.2);
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .category-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-count {
+            background: var(--accent);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .category-card.selected .category-count {
+            background: var(--primary);
+        }
+
+        .category-description {
+            font-size: 0.95rem;
+            color: var(--gray);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .category-photos {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 60px;
+            border: 1px dashed var(--light-gray);
+            border-radius: 8px;
+            padding: 10px;
+            background: var(--light);
+        }
+
+        .category-photos.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-style: italic;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'%3E%3C/circle%3E%3Cpolyline points='21 15 16 10 5 21'%3E%3C/polyline%3E%3C/svg%3E") center no-repeat;
+            background-size: 30px;
+            background-position: center 10px;
+            padding-top: 45px;
+        }
+
+        .category-thumb {
+            width: 55px;
+            height: 55px;
+            border-radius: 5px;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .category-thumb:hover {
+            transform: scale(1.1);
+            z-index: 2;
+        }
+
+        .photos-container {
+            margin-top: 20px;
+        }
+
+        .sort-controls {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .sort-button {
+            background: var(--light);
+            border: 1px solid var(--light-gray);
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .sort-button:hover {
+            background: #e3f2fd;
+            border-color: #bbdefb;
+        }
+
+        .sort-button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 30px;
+        }
+
+        .photo-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .photo-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .photo-container {
+            position: relative;
+            height: 270px;
+            overflow: hidden;
+        }
+
+        .photo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .photo-item:hover .photo-img {
+            transform: scale(1.05);
+        }
+
+        .photo-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 6px;
+            border-radius: 30px;
+        }
+
+        .control-btn {
+            background: none;
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .control-btn.delete:hover {
+            color: var(--error);
+        }
+
+        .control-btn.rotate:hover {
+            color: var(--accent);
+        }
+
+        .category-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .photo-info {
+            padding: 20px;
+        }
+
+        .photo-info input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        .photo-info input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(25, 72, 78, 0.2);
+        }
+
+        .photo-info select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: white;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2319484e' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 12px;
+        }
+
+        .photo-info select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(25, 72, 78, 0.2);
+        }
+
+        .photo-details {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .photo-details input {
+            margin-bottom: 0;
+        }
+
+        .export-section {
+            text-align: center;
+            margin-top: 40px;
+            padding: 40px;
+            background: linear-gradient(to bottom, var(--light), white);
+            border-radius: 15px;
+            border: 1px solid var(--light-gray);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .export-button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 18px 45px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 20px rgba(25, 72, 78, 0.4);
+        }
+
+        .export-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(25, 72, 78, 0.5);
+        }
+
+        .export-button:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+
+        .photo-count {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .validation-check {
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            color: var(--gray);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+            background: var(--light);
+            border-radius: 12px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .empty-state i {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            color: var(--light-gray);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .empty-state p {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--light-gray);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--light-gray);
+            border-radius: 3px;
+            margin: 20px auto 10px;
+            max-width: 300px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: var(--accent);
+            width: 0;
+            transition: width 0.3s ease;
+        }
+
+        .toast {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: var(--primary);
+            color: white;
+            padding: 18px 25px;
+            border-radius: 8px;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.error {
+            background: var(--error);
+        }
+
+        .toast.warning {
+            background: var(--warning);
+        }
+
+        .toast i {
+            font-size: 1.4rem;
+        }
+
+        /* Modal pour la caméra */
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .camera-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .camera-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--light-gray);
+        }
+
+        .camera-header h3 {
+            color: var(--primary-dark);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-camera {
+            background: var(--error);
+            color: white;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-camera:hover {
+            transform: rotate(90deg);
+        }
+
+        .camera-preview {
+            width: 100%;
+            height: 450px;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #cameraFeed {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .camera-btn {
+            padding: 14px 35px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .capture-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 5px 15px rgba(25, 72, 78, 0.4);
+        }
+
+        .capture-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(25, 72, 78, 0.5);
+        }
+
+        .cancel-btn {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--light-gray);
+        }
+
+        .cancel-btn:hover {
+            background: #e9ecef;
+        }
+
+        .camera-switch {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .camera-switch:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        .photo-counter {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 1024px) {
+            .photos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .project-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .photos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                justify-content: center;
+            }
+            
+            .sort-controls {
+                justify-content: center;
+            }
+            
+            .camera-container {
+                width: 95%;
+                padding: 20px;
+            }
+            
+            .camera-preview {
+                height: 350px;
+            }
+            
+            .camera-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .camera-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .photo-details {
+                flex-direction: column;
+            }
+            
+            .photo-details input {
+                width: 100%;
+            }
+            
+            .upload-button {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            .camera-preview {
+                height: 300px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -63,22 +990,130 @@
                         <label for="affaire"><i class="fas fa-building"></i> Affaire :</label>
                         <input type="text" id="affaire" placeholder="Ex: GLOBAL SWITCH - CAMPUS PARIS CLICHY - PAR_E">
                     </div>
-                    <!-- [Conservez tous vos autres champs de formulaire] -->
+                    <div class="info-field">
+                        <label for="code"><i class="fas fa-barcode"></i> Code :</label>
+                        <input type="text" id="code" placeholder="Ex: P 1 1 8 6">
+                    </div>
+                    <div class="info-field">
+                        <label for="agence"><i class="fas fa-map-marker-alt"></i> Agence :</label>
+                        <input type="text" id="agence" placeholder="Ex: Agence Génie Climatique">
+                    </div>
+                    <div class="info-field">
+                        <label for="rapportType"><i class="fas fa-file-alt"></i> Type de rapport :</label>
+                        <input type="text" id="rapportType" placeholder="Ex: Rapport Photo IHM">
+                    </div>
+                    <div class="info-field">
+                        <label for="essais"><i class="fas fa-flask"></i> Essais :</label>
+                        <input type="text" id="essais" placeholder="Ex: ESSAIS L4">
+                    </div>
+                    <div class="info-field">
+                        <label for="rmu"><i class="fas fa-door-open"></i> Salle :</label>
+                        <input type="text" id="rmu" placeholder="Ex: HV/LV RMU L3D">
+                    </div>
                 </div>
             </div>
 
-            <!-- [Conservez toutes vos autres sections HTML] -->
-            <div class="upload-section" id="uploadSection">...</div>
-            <div class="tabs">...</div>
-            <div id="categoriesTab" class="tab-content active">...</div>
-            <div id="photosTab" class="tab-content">...</div>
-            <div class="export-section" id="exportSection" style="display: none;">...</div>
-            <div class="loading" id="loadingSection">...</div>
+            <div class="upload-section" id="uploadSection">
+                <h3><i class="fas fa-cloud-upload-alt"></i> Importer des photos</h3>
+                <p>Prendre des photos directement ou sélectionnez-les depuis votre appareil</p>
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px; flex-wrap: wrap;">
+                    <button class="upload-button" onclick="document.getElementById('photoInput').click()">
+                        <i class="fas fa-folder-open"></i> Choisir des photos
+                    </button>
+                    <button class="upload-button" onclick="openCamera()">
+                        <i class="fas fa-camera"></i> Prendre une photo
+                    </button>
+                </div>
+                <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
+                <p style="margin-top: 20px; font-size: 0.95rem; color: var(--gray);">
+                    Formats acceptés : JPG, PNG | Taille max : 5Mo par photo
+                </p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('categories')">
+                    <i class="fas fa-folder"></i> Catégories
+                </button>
+                <button class="tab" onclick="switchTab('photos')">
+                    <i class="fas fa-images"></i> Toutes les photos
+                </button>
+            </div>
+
+            <div id="categoriesTab" class="tab-content active">
+                <div class="categories-section">
+                    <h3 class="section-title"><i class="fas fa-tasks"></i> Organisez vos photos par catégories</h3>
+                    <div class="categories-grid" id="categoriesGrid"></div>
+                </div>
+            </div>
+
+            <div id="photosTab" class="tab-content">
+                <div class="photos-container">
+                    <div class="sort-controls">
+                        <button class="sort-button" onclick="sortPhotos('stepNumber')">
+                            <i class="fas fa-sort-numeric-down"></i> Numéro d'étape
+                        </button>
+                        <button class="sort-button" onclick="sortPhotos('date')">
+                            <i class="fas fa-calendar-alt"></i> Date
+                        </button>
+                        <button class="sort-button" onclick="sortPhotos('category')">
+                            <i class="fas fa-folder"></i> Catégorie
+                        </button>
+                    </div>
+                    <div id="photosContainer">
+                        <div class="empty-state">
+                            <i class="fas fa-camera"></i>
+                            <h3>Aucune photo importée</h3>
+                            <p>Commencez par importer des photos de votre chantier ou prenez-en directement avec l'appareil photo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="export-section" id="exportSection" style="display: none;">
+                <div class="photo-count" id="photoCount">0 photos importées</div>
+                <button class="export-button" id="exportButton" onclick="exportToPDF()">
+                    <i class="fas fa-file-pdf"></i> Générer le rapport PDF
+                </button>
+                <div class="validation-check">
+                    <input type="checkbox" id="validateFields" checked>
+                    <label for="validateFields">Vérifier que tous les champs sont remplis</label>
+                </div>
+            </div>
+
+            <div class="loading" id="loadingSection">
+                <div class="spinner"></div>
+                <p>Génération du rapport en cours...</p>
+                <div class="progress-bar">
+                    <div class="progress" id="progressBar"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Modal pour la caméra -->
-    <div id="cameraModal" class="camera-modal">...</div>
+    <div id="cameraModal" class="camera-modal">
+        <div class="camera-container">
+            <div class="camera-header">
+                <h3><i class="fas fa-camera"></i> Appareil photo</h3>
+                <button class="close-camera" onclick="closeCamera()">×</button>
+            </div>
+            <div class="camera-preview">
+                <video id="cameraFeed" autoplay playsinline></video>
+                <div class="photo-counter" id="photoCounter">0 photo(s)</div>
+                <button class="camera-switch" id="switchCamera">
+                    <i class="fas fa-sync-alt"></i> Changer de caméra
+                </button>
+            </div>
+            <div class="camera-controls">
+                <button class="camera-btn capture-btn" id="captureButton">
+                    <i class="fas fa-camera"></i> Prendre la photo
+                </button>
+                <button class="camera-btn cancel-btn" onclick="closeCamera()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Variables globales
@@ -87,83 +1122,75 @@
         let activeTab = 'categories';
         let currentSort = 'stepNumber';
         let stream = null;
-        let currentCamera = 'user';
+        let currentCamera = 'user'; // 'user' pour frontal, 'environment' pour arrière
 
         const categories = [
             { id: 'etat_initial', name: 'État initial', icon: 'fas fa-flag', description: 'Photos de l\'état initial du chantier' },
-            // ... [Vos autres catégories] ...
+            { id: 'fire_detection', name: 'Fire Detection', icon: 'fas fa-fire-extinguisher', description: 'Système de détection incendie' },
+            { id: 'first_functional_test', name: 'First Functional Test', icon: 'fas fa-wrench', description: 'Premier test fonctionnel des équipements' },
+            { id: 'increasing_electrical_charge', name: 'Increasing Electrical Charge', icon: 'fas fa-bolt', description: 'Augmentation progressive de la charge électrique' },
+            { id: 'loss_crah_redundancy', name: 'Loss of CRAH redundancy', icon: 'fas fa-server', description: 'Perte de redondance CRAH dans RMU' },
+            { id: 'power_failure_crah', name: 'Power failure of CRAH-C', icon: 'fas fa-plug', description: 'Panne d\'alimentation CRAH-C et perte CRAC' },
+            { id: 'probes_loss_test', name: 'Probes Loss Test', icon: 'fas fa-thermometer-half', description: 'Test de perte de sondes' }
         ];
 
-        // ==================== IndexedDB ====================
-        function openDatabase() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open('ChantierPhotosDB', 1);
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            const photoInput = document.getElementById('photoInput');
+            const uploadSection = document.getElementById('uploadSection');
+            const captureButton = document.getElementById('captureButton');
+            const switchButton = document.getElementById('switchCamera');
 
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains('photos')) {
-                        db.createObjectStore('photos', { keyPath: 'id' });
-                    }
-                    if (!db.objectStoreNames.contains('projectInfo')) {
-                        db.createObjectStore('projectInfo', { keyPath: 'id' });
-                    }
-                };
-
-                request.onsuccess = (event) => resolve(event.target.result);
-                request.onerror = (event) => reject(event.target.error);
-            });
-        }
-
-        async function savePhotos() {
-            const db = await openDatabase();
-            const tx = db.transaction('photos', 'readwrite');
-            const store = tx.objectStore('photos');
-            photos.forEach(photo => store.put(photo));
-        }
-
-        async function loadSavedData() {
-            const db = await openDatabase();
+            photoInput.addEventListener('change', handleFileSelect);
             
-            // Charger les photos
-            const photosPromise = new Promise((resolve) => {
-                const tx = db.transaction('photos', 'readonly');
-                const store = tx.objectStore('photos');
-                const request = store.getAll();
+            // Drag & Drop
+            uploadSection.addEventListener('dragover', handleDragOver);
+            uploadSection.addEventListener('dragleave', handleDragLeave);
+            uploadSection.addEventListener('drop', handleDrop);
+            
+            // Événements pour la caméra
+            if (captureButton) captureButton.addEventListener('click', capturePhoto);
+            if (switchButton) switchButton.addEventListener('click', switchCamera);
 
-                request.onsuccess = () => {
-                    photos = request.result || [];
-                    photoCounter = photos.length > 0 ? Math.max(...photos.map(p => p.id)) : 0;
-                    updatePhotoCount();
-                    if (photos.length > 0) document.getElementById('exportSection').style.display = 'block';
-                    resolve();
-                };
+            // Charger les données sauvegardées
+            loadSavedData();
+            
+            renderCategories();
+        });
+
+        // Fonction pour charger les données sauvegardées
+        function loadSavedData() {
+            const savedPhotos = localStorage.getItem('chantierPhotos');
+            const savedProjectInfo = localStorage.getItem('chantierProjectInfo');
+            
+            if (savedPhotos) {
+                photos = JSON.parse(savedPhotos);
+                photoCounter = photos.length > 0 ? Math.max(...photos.map(p => p.id)) : 0;
+                updatePhotoCount();
+                if (photos.length > 0) {
+                    document.getElementById('exportSection').style.display = 'block';
+                }
+            }
+            
+            if (savedProjectInfo) {
+                const projectInfo = JSON.parse(savedProjectInfo);
+                document.getElementById('affaire').value = projectInfo.affaire || '';
+                document.getElementById('code').value = projectInfo.code || '';
+                document.getElementById('agence').value = projectInfo.agence || '';
+                document.getElementById('rapportType').value = projectInfo.rapportType || '';
+                document.getElementById('essais').value = projectInfo.essais || '';
+                document.getElementById('rmu').value = projectInfo.rmu || '';
+            }
+            
+            // Sauvegarder automatiquement quand les champs changent
+            document.querySelectorAll('.project-info-grid input').forEach(input => {
+                input.addEventListener('input', saveProjectInfo);
             });
-
-            // Charger les infos du projet
-            const projectInfoPromise = new Promise((resolve) => {
-                const tx = db.transaction('projectInfo', 'readonly');
-                const store = tx.objectStore('projectInfo');
-                const request = store.get(1);
-
-                request.onsuccess = () => {
-                    if (request.result) {
-                        document.getElementById('affaire').value = request.result.affaire || '';
-                        document.getElementById('code').value = request.result.code || '';
-                        document.getElementById('agence').value = request.result.agence || '';
-                        document.getElementById('rapportType').value = request.result.rapportType || '';
-                        document.getElementById('essais').value = request.result.essais || '';
-                        document.getElementById('rmu').value = request.result.rmu || '';
-                    }
-                    resolve();
-                };
-            });
-
-            await Promise.all([photosPromise, projectInfoPromise]);
         }
 
+        // Sauvegarder les informations du projet
         function saveProjectInfo() {
             const projectInfo = {
-                id: 1,
                 affaire: document.getElementById('affaire').value,
                 code: document.getElementById('code').value,
                 agence: document.getElementById('agence').value,
@@ -171,72 +1198,111 @@
                 essais: document.getElementById('essais').value,
                 rmu: document.getElementById('rmu').value
             };
-
-            openDatabase().then(db => {
-                const tx = db.transaction('projectInfo', 'readwrite');
-                const store = tx.objectStore('projectInfo');
-                store.put(projectInfo);
-            });
+            
+            localStorage.setItem('chantierProjectInfo', JSON.stringify(projectInfo));
         }
 
-        // ==================== Gestion des photos ====================
-        async function addPhoto(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const now = new Date();
-                    const photo = {
-                        id: ++photoCounter,
-                        file: file.name,
-                        dataUrl: e.target.result,
-                        designation: `Photo ${photoCounter}`,
-                        filename: file.name,
-                        category: 'etat_initial',
-                        stepNumber: photoCounter,
-                        date: now.toISOString().split('T')[0],
-                        time: now.toTimeString().split(' ')[0].slice(0, 5),
-                        rotation: 0
-                    };
-                    photos.push(photo);
-                    savePhotos();
-                    resolve();
-                };
-                reader.readAsDataURL(file);
+        // Sauvegarder les photos
+        function savePhotos() {
+            const photosToSave = photos.map(photo => {
+                // Ne pas sauvegarder les dataUrl pour économiser de l'espace
+                const { dataUrl, ...rest } = photo;
+                return rest;
             });
+            localStorage.setItem('chantierPhotos', JSON.stringify(photosToSave));
         }
 
-        function removePhoto(photoId) {
-            if (confirm('Voulez-vous vraiment supprimer cette photo ?')) {
-                photos = photos.filter(p => p.id !== photoId);
-                savePhotos();
-                
-                openDatabase().then(db => {
-                    const tx = db.transaction('photos', 'readwrite');
-                    const store = tx.objectStore('photos');
-                    store.delete(photoId);
-                });
-
+        // Fonctions globales
+        function switchTab(tabName) {
+            activeTab = tabName;
+            
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            
+            if (tabName === 'photos') {
                 renderPhotos();
+            } else if (tabName === 'categories') {
                 renderCategories();
-                updatePhotoCount();
             }
         }
 
-        // ==================== PWA ====================
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => console.log('SW enregistré !'))
-                    .catch(err => console.log('Échec :', err));
+        function selectCategory(categoryId) {
+            switchTab('photos');
+            renderPhotos(categoryId);
+        }
+
+        function sortPhotos(criteria) {
+            currentSort = criteria;
+            document.querySelectorAll('.sort-button').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.includes(criteria));
             });
+            renderPhotos();
         }
 
-        // ==================== Fonctions existantes ====================
-        function updatePhotoCount() {
-            const countElement = document.getElementById('photoCount');
-            if (countElement) {
-                countElement.textContent = `${photos.length} photo${photos.length > 1 ? 's' : ''} importée${photos.length > 1 ? 's' : ''}`;
+        // Fonctions pour la caméra
+        async function openCamera() {
+            const modal = document.getElementById('cameraModal');
+            modal.style.display = 'flex';
+            document.getElementById('photoCounter').textContent = `${photos.length} photo(s)`;
+            
+            try {
+                // Démarrer la caméra
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: currentCamera,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                const video = document.getElementById('cameraFeed');
+                video.srcObject = stream;
+            } catch (err) {
+                console.error('Erreur d\'accès à la caméra:', err);
+                showToast('Impossible d\'accéder à la caméra', 'error');
+                closeCamera();
             }
+        }
+
+        function closeCamera() {
+            const modal = document.getElementById('cameraModal');
+            modal.style.display = 'none';
+            
+            // Arrêter le flux vidéo
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        function switchCamera() {
+            currentCamera = currentCamera === 'user' ? 'environment' : 'user';
+            closeCamera();
+            setTimeout(openCamera, 300);
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('cameraFeed');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Convertir en blob
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], `photo-chantier-${new Date().toISOString().replace(/:/g, '-')}.jpg`, {
+                    type: 'image/jpeg',
+                    lastModified: Date.now()
+                });
+                
+                await addPhoto(file);
+                showToast('Photo ajoutée avec succès !');
+                document.getElementById('photoCounter').textContent = `${photos.length} photo(s)`;
+            }, 'image/jpeg', 0.9);
         }
 
         function renderCategories() {
@@ -268,36 +1334,509 @@
             container.innerHTML = categoriesHTML;
         }
 
-        // [Continuez avec toutes vos autres fonctions existantes :
-        // openCamera(), closeCamera(), capturePhoto(), 
-        // renderPhotos(), exportToPDF(), etc.]
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            processFiles(files);
+        }
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            const photoInput = document.getElementById('photoInput');
-            const uploadSection = document.getElementById('uploadSection');
-            const captureButton = document.getElementById('captureButton');
-            const switchButton = document.getElementById('switchCamera');
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
 
-            photoInput.addEventListener('change', handleFileSelect);
-            
-            // Drag & Drop
-            uploadSection.addEventListener('dragover', handleDragOver);
-            uploadSection.addEventListener('dragleave', handleDragLeave);
-            uploadSection.addEventListener('drop', handleDrop);
-            
-            // Événements pour la caméra
-            if (captureButton) captureButton.addEventListener('click', capturePhoto);
-            if (switchButton) switchButton.addEventListener('click', switchCamera);
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
 
-            // Charger les données sauvegardées
-            loadSavedData();
+        function handleDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            const files = event.dataTransfer.files;
+            processFiles(files);
+        }
+
+        async function processFiles(files) {
+            for (let file of files) {
+                if (file.type.startsWith('image/')) {
+                    if (file.size > 5 * 1024 * 1024) {
+                        showToast(`Fichier trop volumineux (${(file.size/(1024*1024)).toFixed(1)} Mo): ${file.name}`, 'error');
+                        continue;
+                    }
+                    await addPhoto(file);
+                } else {
+                    showToast('Format non supporté: ' + file.name, 'error');
+                }
+            }
             
-            // Sauvegarder automatiquement quand les champs changent
-            document.querySelectorAll('.project-info-grid input').forEach(input => {
-                input.addEventListener('input', saveProjectInfo);
+            if (activeTab === 'photos') {
+                renderPhotos();
+            } else {
+                renderCategories();
+            }
+            
+            updatePhotoCount();
+            document.getElementById('exportSection').style.display = 'block';
+        }
+
+        function addPhoto(file) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const now = new Date();
+                    const photo = {
+                        id: ++photoCounter,
+                        file: file,
+                        dataUrl: e.target.result,
+                        designation: `Photo ${photoCounter}`,
+                        filename: file.name,
+                        category: 'etat_initial',
+                        stepNumber: photoCounter,
+                        date: now.toISOString().split('T')[0],
+                        time: now.toTimeString().split(' ')[0].slice(0, 5),
+                        rotation: 0
+                    };
+                    photos.push(photo);
+                    savePhotos();
+                    resolve();
+                };
+                reader.readAsDataURL(file);
             });
-        });
+        }
+
+        function rotatePhoto(photoId) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.rotation = (photo.rotation + 90) % 360;
+                renderPhotos();
+            }
+        }
+
+        function renderPhotos(filterCategory = null) {
+            const container = document.getElementById('photosContainer');
+            const exportSection = document.getElementById('exportSection');
+            
+            let photosToShow = [...photos];
+            
+            if (currentSort === 'stepNumber') {
+                photosToShow.sort((a, b) => a.stepNumber - b.stepNumber);
+            } else if (currentSort === 'date') {
+                photosToShow.sort((a, b) => {
+                    const dateA = new Date(a.date + 'T' + a.time);
+                    const dateB = new Date(b.date + 'T' + b.time);
+                    return dateA - dateB;
+                });
+            } else if (currentSort === 'category') {
+                photosToShow.sort((a, b) => {
+                    const catA = categories.find(c => c.id === a.category)?.name || '';
+                    const catB = categories.find(c => c.id === b.category)?.name || '';
+                    return catA.localeCompare(catB);
+                });
+            }
+            
+            if (filterCategory) {
+                photosToShow = photosToShow.filter(photo => photo.category === filterCategory);
+            }
+            
+            if (photos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-camera"></i>
+                        <h3>Aucune photo importée</h3>
+                        <p>Commencez par importer des photos de votre chantier ou prenez-en directement avec l'appareil photo</p>
+                    </div>
+                `;
+                exportSection.style.display = 'none';
+                return;
+            }
+
+            exportSection.style.display = 'block';
+            
+            if (photosToShow.length === 0 && filterCategory) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-folder-open"></i>
+                        <h3>Aucune photo dans cette catégorie</h3>
+                        <p>Assignez des photos à cette catégorie ou importez-en de nouvelles</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const photosHTML = photosToShow.map(photo => {
+                const categoryName = categories.find(cat => cat.id === photo.category)?.name || 'Non assignée';
+                const categoryOptions = categories.map(cat => 
+                    `<option value="${cat.id}" ${photo.category === cat.id ? 'selected' : ''}>${cat.name}</option>`
+                ).join('');
+                
+                return `
+                    <div class="photo-item" data-id="${photo.id}">
+                        <div class="photo-container">
+                            <img src="${photo.dataUrl}" alt="${photo.designation}" 
+                                 class="photo-img" style="transform: rotate(${photo.rotation}deg);">
+                            <div class="category-badge">
+                                <i class="fas fa-folder"></i> ${categoryName}
+                            </div>
+                            <div class="photo-controls">
+                                <button class="control-btn rotate" title="Tourner" onclick="rotatePhoto(${photo.id})">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                                <button class="control-btn delete" title="Supprimer" onclick="removePhoto(${photo.id})">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="photo-info">
+                            <input type="text" value="${photo.designation}" 
+                                   placeholder="Description de la photo..." 
+                                   onchange="updateDesignation(${photo.id}, this.value)">
+                            <select onchange="updateCategory(${photo.id}, this.value)">
+                                <option value="">Sélectionnez une catégorie</option>
+                                ${categoryOptions}
+                            </select>
+                            <div class="photo-details">
+                                <input type="number" value="${photo.stepNumber}" 
+                                       placeholder="N° étape" 
+                                       onchange="updateStepNumber(${photo.id}, this.value)"
+                                       required>
+                                <input type="date" value="${photo.date}" 
+                                       onchange="updateDate(${photo.id}, this.value)"
+                                       required>
+                                <input type="time" value="${photo.time}" 
+                                       onchange="updateTime(${photo.id}, this.value)"
+                                       required>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = `
+                <div class="sort-info" style="margin-bottom: 20px; font-style: italic; color: var(--gray); padding: 0 10px;">
+                    <i class="fas fa-sort"></i> Trié par: ${currentSort === 'stepNumber' ? 'Numéro d\'étape' : 
+                               currentSort === 'date' ? 'Date et heure' : 
+                               'Catégorie'} | ${photosToShow.length} photo(s)
+                </div>
+                <div class="photos-grid">${photosHTML}</div>
+            `;
+        }
+
+        function updateDesignation(photoId, newDesignation) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.designation = newDesignation;
+                savePhotos();
+            }
+        }
+
+        function updateCategory(photoId, newCategory) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.category = newCategory;
+                savePhotos();
+                renderPhotos();
+                renderCategories();
+            }
+        }
+
+        function updateStepNumber(photoId, newStepNumber) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.stepNumber = parseInt(newStepNumber) || 0;
+                savePhotos();
+            }
+        }
+
+        function updateDate(photoId, newDate) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.date = newDate;
+                savePhotos();
+            }
+        }
+
+        function updateTime(photoId, newTime) {
+            const photo = photos.find(p => p.id === photoId);
+            if (photo) {
+                photo.time = newTime;
+                savePhotos();
+            }
+        }
+
+        function removePhoto(photoId) {
+            if (confirm('Voulez-vous vraiment supprimer cette photo ?')) {
+                photos = photos.filter(p => p.id !== photoId);
+                savePhotos();
+                renderPhotos();
+                renderCategories();
+                updatePhotoCount();
+            }
+        }
+
+        function updatePhotoCount() {
+            const countElement = document.getElementById('photoCount');
+            if (countElement) {
+                countElement.textContent = `${photos.length} photo${photos.length > 1 ? 's' : ''} importée${photos.length > 1 ? 's' : ''}`;
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'error' : type === 'warning' ? 'warning' : ''}`;
+            toast.innerHTML = `
+                <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => document.body.removeChild(toast), 300);
+            }, 4000);
+        }
+
+        function validatePhotoFields() {
+            for (const photo of photos) {
+                if (!photo.designation || !photo.category || 
+                    photo.stepNumber === undefined || isNaN(photo.stepNumber) || 
+                    !photo.date || !photo.time) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function highlightMissingFields() {
+            const photoItems = document.querySelectorAll('.photo-item');
+            photoItems.forEach(item => {
+                const inputs = item.querySelectorAll('input');
+                let hasMissing = false;
+                
+                inputs.forEach(input => {
+                    if (!input.value) {
+                        input.style.borderColor = '#e74c3c';
+                        hasMissing = true;
+                    } else {
+                        input.style.borderColor = '';
+                    }
+                });
+                
+                const select = item.querySelector('select');
+                if (!select.value) {
+                    select.style.borderColor = '#e74c3c';
+                    hasMissing = true;
+                } else {
+                    select.style.borderColor = '';
+                }
+                
+                if (hasMissing) {
+                    item.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.3)';
+                } else {
+                    item.style.boxShadow = '';
+                }
+            });
+            
+            return false;
+        }
+
+        async function exportToPDF() {
+            if (photos.length === 0) {
+                showToast('Aucune photo à exporter', 'error');
+                return;
+            }
+
+            // Validation des champs
+            const validateFields = document.getElementById('validateFields').checked;
+            if (validateFields && !validatePhotoFields()) {
+                showToast('Veuillez remplir tous les champs pour chaque photo', 'error');
+                highlightMissingFields();
+                return;
+            }
+
+            const loadingSection = document.getElementById('loadingSection');
+            const exportButton = document.getElementById('exportButton');
+            const progressBar = document.getElementById('progressBar');
+            
+            loadingSection.style.display = 'block';
+            exportButton.disabled = true;
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF();
+                const pageWidth = pdf.internal.pageSize.width;
+                const pageHeight = pdf.internal.pageSize.height;
+                const margin = 15;
+                const headerHeight = 15;
+                const footerHeight = 15;
+                const contentHeight = pageHeight - headerHeight - footerHeight - margin * 2;
+                const maxImageWidth = pageWidth - 2 * margin;
+                const maxImageHeight = contentHeight / 2 - 40;
+
+                // Mise à jour de la barre de progression
+                progressBar.style.width = '10%';
+
+                // Fonction pour formater la date en JJ/MM/AAAA
+                const formatDate = (dateStr) => {
+                    if (!dateStr) return '';
+                    const [year, month, day] = dateStr.split('-');
+                    return `${day}/${month}/${year}`;
+                };
+
+                // Fonction pour ajouter un en-tête
+                const addHeader = (pdf, pageNumber) => {
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(100);
+                    pdf.text(`Rapport Photo Chantier - Page ${pageNumber}`, margin, 10);
+                };
+
+                // Fonction pour ajouter un pied de page
+                const addFooter = (pdf) => {
+                    pdf.setFontSize(9);
+                    pdf.setTextColor(100);
+                    const date = new Date().toLocaleDateString('fr-FR');
+                    pdf.text(`Généré le ${date}`, margin, pageHeight - 5);
+                    pdf.text(document.getElementById('agence').value || '', pageWidth - margin, pageHeight - 5, { align: 'right' });
+                };
+
+                // Récupérer les informations du projet
+                const projectInfo = {
+                    affaire: document.getElementById('affaire').value || 'Non renseigné',
+                    code: document.getElementById('code').value || 'Non renseigné',
+                    agence: document.getElementById('agence').value || 'Non renseigné',
+                    rapportType: document.getElementById('rapportType').value || 'Non renseigné',
+                    essais: document.getElementById('essais').value || 'Non renseigné',
+                    rmu: document.getElementById('rmu').value || 'Non renseigné'
+                };
+
+                // Ajouter la page de titre
+                pdf.setFontSize(24);
+                pdf.setTextColor(25, 72, 78);
+                pdf.text('RAPPORT PHOTO CHANTIER', pageWidth / 2, 40, { align: 'center' });
+                
+                pdf.setFontSize(18);
+                pdf.setTextColor(41, 128, 185);
+                pdf.text(projectInfo.affaire, pageWidth / 2, 55, { align: 'center' });
+                
+                pdf.setFontSize(14);
+                pdf.setTextColor(52, 73, 94);
+                pdf.text('Informations du projet', pageWidth / 2, 75, { align: 'center' });
+                
+                pdf.setFontSize(12);
+                pdf.setTextColor(44, 62, 80);
+                let yPosition = 90;
+                
+                // Afficher les informations du projet
+                Object.entries(projectInfo).forEach(([key, value], index) => {
+                    const text = `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`;
+                    pdf.text(text, pageWidth / 2, yPosition + index * 10, { align: 'center' });
+                });
+
+                pdf.addPage();
+                
+
+                // Mise à jour de la barre de progression
+                progressBar.style.width = '20%';
+
+                // Trier toutes les photos par catégorie et par numéro d'étape
+                let sortedPhotos = [];
+                for (const category of categories) {
+                    const categoryPhotos = photos.filter(p => p.category === category.id)
+                                                .sort((a, b) => a.stepNumber - b.stepNumber);
+                    sortedPhotos = sortedPhotos.concat(categoryPhotos);
+                }
+
+                // Diviser en groupes de 2 photos par page
+                const groups = [];
+                for (let i = 0; i < sortedPhotos.length; i += 2) {
+                    groups.push(sortedPhotos.slice(i, i + 2));
+                }
+
+                // Ajouter les pages de photos
+                for (let i = 0; i < groups.length; i++) {
+                    if (i > 0) {
+                        pdf.addPage();
+                    }
+                    
+                    const currentPage = pdf.internal.getNumberOfPages();
+                    addHeader(pdf, currentPage);
+                    
+                    const group = groups[i];
+                    
+                    // Pour chaque photo dans le groupe (1 ou 2 photos)
+                    for (let j = 0; j < group.length; j++) {
+                        const photo = group[j];
+                        const categoryName = categories.find(c => c.id === photo.category)?.name || 'Non assignée';
+                        
+                        // Position verticale pour cette photo
+                        const yStart = headerHeight + margin + j * (contentHeight / 2);
+                        
+                        // Afficher le bandeau de catégorie
+                        pdf.setFillColor(25, 72, 78);
+                        pdf.rect(margin, yStart, pageWidth - 2 * margin, 15, 'F');
+                        pdf.setTextColor(255);
+                        pdf.setFontSize(11);
+                        pdf.text(categoryName, margin + 5, yStart + 10);
+                        
+                        // Charger l'image
+                        const img = new Image();
+                        img.src = photo.dataUrl;
+                        await new Promise((resolve) => {
+                            img.onload = resolve;
+                        });
+
+                        // Calculer les dimensions de l'image
+                        const ratio = img.width / img.height;
+                        let imgWidth = maxImageWidth;
+                        let imgHeight = imgWidth / ratio;
+                        
+                        // Ajuster si l'image est trop haute
+                        if (imgHeight > maxImageHeight) {
+                            imgHeight = maxImageHeight;
+                            imgWidth = imgHeight * ratio;
+                        }
+                        
+                        // Centrer l'image horizontalement
+                        const xPosition = margin + (maxImageWidth - imgWidth) / 2;
+                        
+                        // Ajouter l'image
+                        pdf.addImage(img, 'JPEG', xPosition, yStart + 20, imgWidth, imgHeight);
+                        
+                        // Ajouter les informations sous l'image
+                        pdf.setTextColor(0);
+                        pdf.setFontSize(11);
+                        pdf.text(photo.designation, pageWidth / 2, yStart + 30 + imgHeight, { align: 'center' });
+                        
+                        pdf.setFontSize(10);
+                        pdf.setTextColor(100);
+                        const infoText = `Étape: ${photo.stepNumber} | Date: ${formatDate(photo.date)} ${photo.time}`;
+                        pdf.text(infoText, pageWidth / 2, yStart + 35 + imgHeight, { align: 'center' });
+                    }
+
+                    // Mise à jour de la barre de progression
+                    progressBar.style.width = `${20 + (i+1)/groups.length*70}%`;
+                }
+
+                // Ajouter le pied de page à chaque page
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    addFooter(pdf);
+                }
+
+                // Générer le PDF
+                const fileName = `rapport-photos-${projectInfo.affaire || 'chantier'}-${new Date().toISOString().slice(0, 10)}.pdf`;
+                pdf.save(fileName);
+                
+                showToast('Rapport PDF généré avec succès !');
+            } catch (error) {
+                console.error('Erreur lors de la génération du PDF:', error);
+                showToast('Erreur lors de la génération du PDF', 'error');
+            } finally {
+                loadingSection.style.display = 'none';
+                exportButton.disabled = false;
+                progressBar.style.width = '0';
+            }
+        }
     </script>
 </body>
 </html>
