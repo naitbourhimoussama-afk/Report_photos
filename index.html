@@ -1,13 +1,8 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photos Testes</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    
+
+  <!-- ZIP + SaveAs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
@@ -51,6 +46,19 @@
     .category-card.selected{box-shadow:0 0 0 3px rgba(95,165,134,.2)}
     .category-card:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.1)}
 
+    /* boutons d’action dans les cartes catégories */
+    .category-card .control-btn{background:none;color:#0f172a;border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;transition:all .2s}
+    .category-card .control-btn:hover{background:rgba(15,23,42,.06)}
+
+    /* carte spéciale "Ajouter" */
+    .category-card.add-card {
+      border: 2px dashed var(--light-gray);
+      background: #fbfbfb;
+      text-align: center;
+      color: #0f172a;
+    }
+    .category-card.add-card:hover { border-color: var(--accent); }
+
     .photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:30px}
     .photo-item{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.08);transition:all 0.3s}
     .photo-item:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.15)}
@@ -85,6 +93,15 @@
     .pdf-options h4{margin-bottom:15px;color:var(--primary)}
     .option-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
     .option-row label{font-size:14px;color:#495057;cursor:pointer}
+
+    /* === Modal catégories === */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:3000}
+    .modal{background:#fff;border-radius:12px;max-width:520px;width:95%;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+    .modal header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+    .modal header h3{margin:0}
+    .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+    .modal input, .modal textarea{width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px}
+    .modal small{color:#64748b}
   </style>
 </head>
 <body>
@@ -93,8 +110,8 @@
       <div class="logo-container">
         <img class="logo" alt="Equans" src="https://upload.wikimedia.org/wikipedia/fr/0/0c/Equans_Logo.png">
       </div>
-      <h1><i class="fas fa-camera"></i> Reportage Photos T&C </h1>
-      <p>Organiser les photos (testes L3 ou L4, BMS,...) et générer des rapports PDF de haute qualité</p>
+      <h1><i class="fas fa-camera"></i> Reportage Photos Professionnel</h1>
+      <p>Organiser les photos par catégorie et générer des rapports PDF de haute qualité</p>
     </div>
 
     <div class="content">
@@ -121,7 +138,7 @@
 
       <div id="uploadSection" class="upload-section">
         <h3><i class="fas fa-cloud-upload-alt"></i> Importer des photos</h3>
-        <p>Faites une capture d'écran, utilisez la caméra ou importez des photos</p>
+        <p>Faites une capture d'écran, utilisez la caméra ou importez des fichiers.</p>
         <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:14px">
           <button class="upload-button" onclick="document.getElementById('photoInput').click()"><i class="fas fa-folder-open"></i> Choisir des photos</button>
           <button class="upload-button" onclick="openCamera()"><i class="fas fa-camera"></i> Prendre une photo</button>
@@ -181,6 +198,10 @@
             <input id="highQuality" type="checkbox" checked>
             <label for="highQuality">Haute qualité d'image (fichier plus volumineux)</label>
           </div>
+          <div class="option-row">
+            <input id="zipPackage" type="checkbox" checked>
+            <label for="zipPackage">Télécharger un ZIP (PDF à la racine + photos rangées par catégorie)</label>
+          </div>
         </div>
       </div>
 
@@ -210,6 +231,38 @@
     </div>
   </div>
 
+  <!-- Modal Catégorie -->
+  <div id="categoryModalOverlay" class="modal-overlay">
+    <div class="modal">
+      <header>
+        <h3><i class="fas fa-tags"></i> Catégorie</h3>
+        <button onclick="closeCategoryModal()" style="background:#e74c3c;color:#fff;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer">×</button>
+      </header>
+      <input id="catId" type="hidden">
+      <div class="info-field">
+        <label for="catName">Nom de la catégorie :</label>
+        <input id="catName" placeholder="Ex: Water Leak Test">
+      </div>
+      <div class="info-field" style="margin-top:10px">
+        <label for="catIcon">Icône (classe Font Awesome) :</label>
+        <input id="catIcon" placeholder="Ex: fas fa-tint">
+        <small>Astuce : <code>fas fa-bolt</code>, <code>fas fa-plug</code>, <code>fas fa-fire-extinguisher</code>…</small>
+      </div>
+      <div class="info-field" style="margin-top:10px">
+        <label for="catDesc">Description :</label>
+        <textarea id="catDesc" rows="3" placeholder="Texte d’aide affiché sous le titre"></textarea>
+      </div>
+      <div class="actions">
+        <button class="upload-button" style="background:#e5e7eb;color:#111" onclick="closeCategoryModal()">
+          <i class="fas fa-times"></i> Annuler
+        </button>
+        <button class="upload-button" onclick="saveCategoryFromModal()">
+          <i class="fas fa-check"></i> Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ===== Globals
     let photos = [];
@@ -217,7 +270,8 @@
     let activeTab = 'categories';
     let stream = null;
 
-    const categories = [
+    // === Catégories dynamiques avec persistance localStorage
+    const defaultCategories = [
       { id:'etat_initial', name:'État initial', icon:'fas fa-flag', description:"Photos de l'état initial du chantier" },
       { id:'fire_detection', name:'Fire Detection', icon:'fas fa-fire-extinguisher', description:'Système de détection incendie' },
       { id:'first_functional_test', name:'First Functional Test', icon:'fas fa-wrench', description:'Premier test fonctionnel des équipements' },
@@ -226,6 +280,16 @@
       { id:'power_failure_crah', name:'Power failure of CRAH-C', icon:'fas fa-plug', description:"Panne d'alimentation CRAH-C et perte CRAC" },
       { id:'probes_loss_test', name:'Probes Loss Test', icon:'fas fa-thermometer-half', description:'Test de perte de sondes' }
     ];
+
+    // let pour pouvoir modifier
+    let categories = (() => {
+      try {
+        const saved = localStorage.getItem('photo_categories_v1');
+        return saved ? JSON.parse(saved) : defaultCategories;
+      } catch { return defaultCategories; }
+    })();
+
+    function saveCategories(){ try{ localStorage.setItem('photo_categories_v1', JSON.stringify(categories)); }catch{} }
 
     document.addEventListener('DOMContentLoaded', () => {
       const photoInput = document.getElementById('photoInput');
@@ -241,18 +305,10 @@
       renderCategories();
     });
 
-    // ===== Persistence (using memory storage for Claude.ai compatibility)
-    function loadSavedData(){
-      renderCategories();
-    }
-    
-    function saveProjectInfo(){
-      // Memory storage - would save to server in real app
-    }
-    
-    function savePhotos(){
-      // Memory storage - would save to server in real app
-    }
+    // ===== Persistence (placeholders pour compatibilité)
+    function loadSavedData(){ renderCategories(); }
+    function saveProjectInfo(){ /* no-op */ }
+    function savePhotos(){ /* no-op */ }
 
     // ===== UI helpers
     function showToast(msg, type=''){ 
@@ -261,10 +317,7 @@
       t.textContent=msg; 
       document.body.appendChild(t); 
       setTimeout(()=>t.classList.add('show'),10); 
-      setTimeout(()=>{
-        t.classList.remove('show'); 
-        setTimeout(()=>t.remove(),250)
-      },3500); 
+      setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>t.remove(),250) },3500); 
     }
     
     function switchTab(tab){ 
@@ -300,10 +353,7 @@
     
     function closeCamera(){ 
       document.getElementById('cameraModal').style.display='none'; 
-      if(stream){
-        stream.getTracks().forEach(t=>t.stop()); 
-        stream=null;
-      } 
+      if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } 
     }
     
     function capturePhoto(){ 
@@ -337,12 +387,8 @@
             c.height=bm.height; 
             c.getContext('2d').drawImage(bm,0,0);
             blob = await new Promise(res=>c.toBlob(res,'image/png',.92));
-          }catch{ 
-            blob = await frameFromVideo(displayStream); 
-          }
-        }else{ 
-          blob = await frameFromVideo(displayStream); 
-        }
+          }catch{ blob = await frameFromVideo(displayStream); }
+        }else{ blob = await frameFromVideo(displayStream); }
         displayStream.getTracks().forEach(t=>t.stop());
         const f=new File([blob],`screenshot-${ts()}.png`,{type:'image/png'}); 
         await addPhoto(f); 
@@ -350,9 +396,7 @@
         if(activeTab==='photos') renderPhotos(); else renderCategories(); 
         updatePhotoCount(); 
         document.getElementById('exportSection').style.display='block';
-      }catch(e){ 
-        showToast("Capture d'écran annulée ou refusée",'warning'); 
-      }
+      }catch(e){ showToast("Capture d'écran annulée ou refusée",'warning'); }
     }
     
     async function frameFromVideo(stream){ 
@@ -384,14 +428,8 @@
     // ===== Photo management
     async function processFiles(files){
       for (const file of files){
-        if (!file.type.startsWith('image/')) { 
-          showToast('Format non supporté','error'); 
-          continue; 
-        }
-        if (file.size > 5*1024*1024){ 
-          showToast('Fichier > 5 Mo','error'); 
-          continue; 
-        }
+        if (!file.type.startsWith('image/')) { showToast('Format non supporté','error'); continue; }
+        if (file.size > 5*1024*1024){ showToast('Fichier > 5 Mo','error'); continue; }
         await addPhoto(file);
       }
       if (activeTab==='photos') renderPhotos(); else renderCategories();
@@ -425,22 +463,29 @@
     
     function rotatePhoto(id){ 
       const p=photos.find(x=>x.id===id); 
-      if(p){ 
-        p.rotation=(p.rotation+90)%360; 
-        renderPhotos(); 
-      } 
+      if(p){ p.rotation=(p.rotation+90)%360; renderPhotos(); } 
     }
     
     function updateDesignation(id,v){ 
       const p=photos.find(x=>x.id===id); 
       if(p){p.designation=v; savePhotos();} 
     }
-    
-    function updateCategory(id,v){ 
-      const p=photos.find(x=>x.id===id); 
-      if(p){p.category=v; savePhotos(); renderPhotos(); renderCategories();} 
+
+    // === Gestion Catégories (création à la volée)
+    let pendingAssignPhotoId = null; // si on ouvre le modal depuis un select
+
+    function updateCategory(id,v){
+      const p=photos.find(x=>x.id===id);
+      if(!p) return;
+      if(v==='__new__'){
+        pendingAssignPhotoId = id;
+        openCategoryModal();
+        renderPhotos(); // remettre l’ancien choix visuellement
+        return;
+      }
+      p.category=v; savePhotos(); renderPhotos(); renderCategories();
     }
-    
+
     function updateStepNumber(id,v){ 
       const p=photos.find(x=>x.id===id); 
       if(p){p.stepNumber=parseInt(v)||0; savePhotos();} 
@@ -465,18 +510,100 @@
       updatePhotoCount(); 
     }
 
+    // === Helpers Catégories (modal + CRUD)
+    function slugify(t){
+      return t.toLowerCase().trim()
+        .replace(/[^a-z0-9]+/g,'_')
+        .replace(/^_+|_+$/g,'')
+        .slice(0,60);
+    }
+
+    function openCategoryModal(editId=null){
+      const overlay = document.getElementById('categoryModalOverlay');
+      const isEdit = !!editId;
+      const c = isEdit ? categories.find(x=>x.id===editId) : {id:'',name:'',icon:'fas fa-tag',description:''};
+      document.getElementById('catId').value = c.id || '';
+      document.getElementById('catName').value = c.name || '';
+      document.getElementById('catIcon').value = c.icon || 'fas fa-tag';
+      document.getElementById('catDesc').value = c.description || '';
+      overlay.style.display = 'flex';
+    }
+
+    function closeCategoryModal(){
+      document.getElementById('categoryModalOverlay').style.display='none';
+      pendingAssignPhotoId = null;
+    }
+
+    function saveCategoryFromModal(){
+      const idInput = document.getElementById('catId').value;
+      const name = (document.getElementById('catName').value || '').trim();
+      const icon = (document.getElementById('catIcon').value || 'fas fa-tag').trim();
+      const description = (document.getElementById('catDesc').value || '').trim();
+
+      if(!name){ showToast('Nom de catégorie requis','error'); return; }
+
+      let id = idInput || slugify(name);
+      let base = id, i = 2;
+      while(categories.some(c=>c.id===id)) { id = `${base}_${i++}`; }
+
+      if(idInput){
+        const idx = categories.findIndex(c=>c.id===idInput);
+        if(idx>-1){ categories[idx] = { id: idInput, name, icon, description }; }
+      }else{
+        categories.push({ id, name, icon, description });
+      }
+      saveCategories();
+
+      if(pendingAssignPhotoId){
+        const p = photos.find(x=>x.id===pendingAssignPhotoId);
+        if(p){ p.category = idInput || id; savePhotos(); }
+      }
+
+      closeCategoryModal();
+      renderCategories();
+      renderPhotos();
+      showToast('Catégorie enregistrée','success');
+    }
+
+    function deleteCategory(id){
+      if(!confirm('Supprimer cette catégorie ? Les photos seront réassignées à "État initial".')) return;
+      photos.forEach(p=>{ if(p.category===id) p.category='etat_initial'; });
+      categories = categories.filter(c=>c.id!==id);
+      saveCategories(); savePhotos();
+      renderCategories(); renderPhotos();
+    }
+
+    function resetDefaultCategories(){
+      if(!confirm('Revenir aux catégories par défaut ?')) return;
+      categories = defaultCategories.slice();
+      saveCategories(); renderCategories(); renderPhotos();
+    }
+
+    // === Rendu
     function renderCategories(){
       const container=document.getElementById('categoriesGrid');
-      container.innerHTML = categories.map(cat=>{
+      const cards = categories.map(cat=>{
         const items=photos.filter(p=>p.category===cat.id);
         return `<div class="category-card ${items.length?'selected':''}" onclick="selectCategory('${cat.id}')">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <div style="font-weight:700;color:#083344"><i class="${cat.icon}"></i> ${cat.name}</div>
-            <div style="background:#5fa586;color:#fff;padding:4px 10px;border-radius:14px;font-weight:600">${items.length}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="background:#5fa586;color:#fff;padding:4px 10px;border-radius:14px;font-weight:600">${items.length}</span>
+              <button onclick="event.stopPropagation(); openCategoryModal('${cat.id}')" class="control-btn" title="Modifier"><i class="fas fa-pen"></i></button>
+              ${cat.id!=='etat_initial' ? `<button onclick="event.stopPropagation(); deleteCategory('${cat.id}')" class="control-btn" title="Supprimer"><i class="fas fa-trash"></i></button>`:''}
+            </div>
           </div>
-          <div style="color:#6b7280">${cat.description}</div>
+          <div style="color:#6b7280">${cat.description||''}</div>
         </div>`;
-      }).join('');
+      });
+
+      // carte "Ajouter une catégorie"
+      cards.push(`<div class="category-card add-card" onclick="openCategoryModal()">
+        <div style="font-weight:700;margin-bottom:8px"><i class="fas fa-plus-circle"></i> Ajouter une catégorie</div>
+        <div style="color:#6b7280">Créez une catégorie personnalisée (nom, icône, description)</div>
+      </div>`);
+
+      container.innerHTML = cards.join('');
     }
 
     function renderPhotos(filterCategory=null){
@@ -490,7 +617,10 @@
 
       const html=list.map(p=>{
         const catName = categories.find(c=>c.id===p.category)?.name || 'Non assignée';
-        const opts = categories.map(c=>`<option value="${c.id}" ${p.category===c.id?'selected':''}>${c.name}</option>`).join('');
+        const opts = [
+          ...categories.map(c=>`<option value="${c.id}" ${p.category===c.id?'selected':''}>${c.name}</option>`),
+          `<option value="__new__">➕ Nouvelle catégorie…</option>`
+        ].join('');
         return `<div class="photo-item">
           <div class="photo-container">
             <img class="photo-img" src="${p.dataUrl}" style="transform:rotate(${p.rotation}deg)"/>
@@ -514,23 +644,85 @@
       container.innerHTML = `<div class="photos-grid">${html}</div>`;
     }
 
-    // ===== Enhanced PDF Export with FIXED photo details display
+    // ===== Helpers ZIP & noms de fichiers
+    function sanitize(s){
+      return (s||'').normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g,'')
+        .replace(/[^a-z0-9\-_\s]/gi,'')
+        .trim()
+        .replace(/\s+/g,'_');
+    }
+
+    function dataURLtoBlob(dataurl){
+      const [head, body] = dataurl.split(',');
+      const mime = head.match(/:(.*?);/)[1];
+      const bstr = atob(body);
+      const u8 = new Uint8Array(bstr.length);
+      for (let i=0;i<bstr.length;i++) u8[i] = bstr.charCodeAt(i);
+      return new Blob([u8], {type:mime});
+    }
+
+    // Rend la photo en Blob JPEG en appliquant la rotation si nécessaire
+    async function getPhotoBlobWithRotation(photo){
+      return new Promise(resolve=>{
+        const img = new Image();
+        img.onload = () => {
+          const angle = (photo.rotation||0) % 360;
+          let w = img.width, h = img.height;
+          const canvas = document.createElement('canvas');
+          if (angle === 90 || angle === 270){ canvas.width = h; canvas.height = w; }
+          else { canvas.width = w; canvas.height = h; }
+          const ctx = canvas.getContext('2d');
+          if (angle){
+            ctx.translate(canvas.width/2, canvas.height/2);
+            ctx.rotate(angle * Math.PI/180);
+            ctx.drawImage(img, -w/2, -h/2);
+          } else {
+            ctx.drawImage(img, 0, 0);
+          }
+          canvas.toBlob(b => resolve(b), 'image/jpeg', 0.92);
+        };
+        img.onerror = () => resolve(dataURLtoBlob(photo.dataUrl));
+        img.src = photo.dataUrl;
+      });
+    }
+
+    // Construit le ZIP: racine = nom du PDF, PDF à la racine, dossiers de catégories, photos renommées
+    async function exportZipWithPhotos(pdfBlob, pdfFileName){
+      const zip = new JSZip();
+      const rootName = sanitize(pdfFileName.replace(/\.pdf$/,''));
+      const root = zip.folder(rootName);
+
+      // 1) PDF à la racine
+      root.file(pdfFileName, pdfBlob);
+
+      // 2) Dossiers par catégorie
+      const folderByCat = {};
+      categories.forEach(c => folderByCat[c.id] = root.folder(sanitize(c.name)));
+
+      // 3) Photos renommées -> Step-XXX_YYYY-MM-DD_HH-MM_Designation.jpg
+      for (const p of photos){
+        const folder = folderByCat[p.category] || root.folder('Non_classee');
+        const step = String(p.stepNumber||0).padStart(3,'0');
+        const date = (p.date||'').trim();
+        const time = (p.time||'').replace(':','-');
+        const base = sanitize(p.designation || `Photo_${p.id}`);
+        const fname = `Step-${step}_${date}${time?`_${time}`:''}_${base}.jpg`;
+        const blob = await getPhotoBlobWithRotation(p);
+        folder.file(fname, blob);
+      }
+
+      // 4) Génère et télécharge le ZIP
+      const zipBlob = await zip.generateAsync({type:'blob'});
+      saveAs(zipBlob, `${rootName}.zip`);
+    }
+
+    // ===== PDF helpers
     function getCategoryName(id){ 
       return (categories.find(c => c.id === id)?.name) || 'Non classée'; 
     }
-
-    // FIXED: Format date function to handle French format properly
-    function formatDate(dateStr) {
-      if (!dateStr) return '';
-      const [year, month, day] = dateStr.split('-');
-      return `${day}/${month}/${year}`;
-    }
-
-    // FIXED: Format time function to handle 24h format properly
-    function formatTime(timeStr) {
-      if (!timeStr) return '';
-      return timeStr; // Time is already in HH:MM format
-    }
+    function formatDate(dateStr) { if (!dateStr) return ''; const [y,m,d]=dateStr.split('-'); return `${d}/${m}/${y}`; }
+    function formatTime(timeStr) { return timeStr || ''; }
 
     async function addCoverPage(pdf, info){
       const pageW=pdf.internal.pageSize.getWidth();
@@ -538,11 +730,8 @@
       const margin=15;
       const blue={r:25,g:72,b:78};
 
-      // Header with gradient effect
       pdf.setFillColor(blue.r,blue.g,blue.b);
       pdf.rect(0, 0, pageW, 50, 'F');
-      
-      // Add logos
       try{
         const eq=new Image(); 
         eq.crossOrigin='anonymous'; 
@@ -550,14 +739,10 @@
         await new Promise(r=>{eq.onload=r; eq.onerror=r}); 
         pdf.addImage(eq,'PNG', margin, 10, 50, 16);
       }catch{}
-
-      // Title
       pdf.setTextColor(255,255,255);
-      pdf.setFont('helvetica','bold');
-      pdf.setFontSize(28);
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(28);
       pdf.text('RAPPORT PHOTO TECHNIQUE', pageW/2, 35, {align:'center'});
 
-      // Project info section
       let y = 70;
       pdf.setFillColor(248,249,250);
       pdf.rect(margin, y, pageW-2*margin, 80, 'F');
@@ -565,80 +750,51 @@
       pdf.rect(margin, y, pageW-2*margin, 80);
 
       pdf.setTextColor(blue.r,blue.g,blue.b);
-      pdf.setFontSize(16);
-      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(16); pdf.setFont('helvetica','bold');
       pdf.text('INFORMATIONS PROJET', margin+10, y+15);
 
       y += 25;
-      pdf.setTextColor(0);
-      pdf.setFontSize(12);
-      pdf.setFont('helvetica','normal');
+      pdf.setTextColor(0); pdf.setFontSize(12); pdf.setFont('helvetica','normal');
 
       const leftCol = margin + 10;
       const rightCol = pageW/2 + 10;
       const lineHeight = 12;
 
-      // Left column
-      pdf.setFont('helvetica','bold');
-      pdf.text('Affaire:', leftCol, y);
-      pdf.setFont('helvetica','normal');
-      pdf.text(info.affaire || 'Non spécifié', leftCol + 25, y);
-      y += lineHeight;
+      pdf.setFont('helvetica','bold'); pdf.text('Affaire:', leftCol, y);
+      pdf.setFont('helvetica','normal'); pdf.text(info.affaire || 'Non spécifié', leftCol + 25, y); y += lineHeight;
 
-      pdf.setFont('helvetica','bold');
-      pdf.text('Code:', leftCol, y);
-      pdf.setFont('helvetica','normal');
-      pdf.text(info.code || 'Non spécifié', leftCol + 25, y);
-      y += lineHeight;
+      pdf.setFont('helvetica','bold'); pdf.text('Code:', leftCol, y);
+      pdf.setFont('helvetica','normal'); pdf.text(''+(info.code || 'Non spécifié'), leftCol + 25, y); y += lineHeight;
 
-      pdf.setFont('helvetica','bold');
-      pdf.text('Agence:', leftCol, y);
-      pdf.setFont('helvetica','normal');
-      pdf.text(info.agence || 'Non spécifié', leftCol + 25, y);
+      pdf.setFont('helvetica','bold'); pdf.text('Agence:', leftCol, y);
+      pdf.setFont('helvetica','normal'); pdf.text(info.agence || 'Non spécifié', leftCol + 25, y);
 
-      // Right column
       y = 95;
-      pdf.setFont('helvetica','bold');
-      pdf.text('Type:', rightCol, y);
-      pdf.setFont('helvetica','normal');
-      pdf.text(info.rapportType || 'Functional testing', rightCol + 25, y);
-      y += lineHeight;
+      pdf.setFont('helvetica','bold'); pdf.text('Type:', rightCol, y);
+      pdf.setFont('helvetica','normal'); pdf.text(info.rapportType || 'Functional testing', rightCol + 25, y); y += lineHeight;
 
-      pdf.setFont('helvetica','bold');
-      pdf.text('Date:', rightCol, y);
-      pdf.setFont('helvetica','normal');
-      pdf.text(formatDate(info.commissioningDate) || new Date().toLocaleDateString('fr-FR'), rightCol + 25, y);
-      y += lineHeight;
+      pdf.setFont('helvetica','bold'); pdf.text('Date:', rightCol, y);
+      pdf.setFont('helvetica','normal'); pdf.text(formatDate(info.commissioningDate) || new Date().toLocaleDateString('fr-FR'), rightCol + 25, y); y += lineHeight;
 
-      pdf.setFont('helvetica','bold');
-      pdf.text('Salle:', rightCol, y);
-      pdf.setFont('helvetica','normal');
-      pdf.text(info.rmu || 'Non spécifié', rightCol + 25, y);
+      pdf.setFont('helvetica','bold'); pdf.text('Salle:', rightCol, y);
+      pdf.setFont('helvetica','normal'); pdf.text(info.rmu || 'Non spécifié', rightCol + 25, y);
 
-      // Summary section
       y = 170;
       pdf.setFillColor(blue.r,blue.g,blue.b);
       pdf.rect(margin, y, pageW-2*margin, 30, 'F');
-      pdf.setTextColor(255);
-      pdf.setFontSize(14);
-      pdf.setFont('helvetica','bold');
+      pdf.setTextColor(255); pdf.setFontSize(14); pdf.setFont('helvetica','bold');
       pdf.text('RÉSUMÉ DU RAPPORT', margin+10, y+20);
 
       y += 40;
-      pdf.setTextColor(0);
-      pdf.setFontSize(11);
-      pdf.setFont('helvetica','normal');
-      
+      pdf.setTextColor(0); pdf.setFontSize(11); pdf.setFont('helvetica','normal');
       const totalPhotos = photos.length;
       const categoriesUsed = [...new Set(photos.map(p => p.category))].length;
-      
       pdf.text(`• Nombre total de photos: ${totalPhotos}`, margin+10, y);
       pdf.text(`• Catégories utilisées: ${categoriesUsed}`, margin+10, y+12);
       pdf.text(`• Date de génération: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, margin+10, y+24);
 
-      // Footer
-      pdf.setFontSize(8);
-      pdf.setTextColor(100);
+      pdf.setFontSize(8); pdf.setTextColor(100);
+      pdf.text('Document généré automatiquement - Confidentiel', pageW/2, pageH-10, {align:'center'});
     }
 
     async function addTableOfContents(pdf, categoryStats){
@@ -646,12 +802,10 @@
       const pageW = pdf.internal.pageSize.getWidth();
       const margin = 15;
 
-      // Header
       pdf.setFillColor(25,72,78);
       pdf.rect(0, 0, pageW, 30, 'F');
       pdf.setTextColor(255);
-      pdf.setFont('helvetica','bold');
-      pdf.setFontSize(18);
+      pdf.setFont('helvetica','bold'); pdf.setFontSize(18);
       pdf.text('TABLE DES MATIÈRES', pageW/2, 20, {align:'center'});
 
       let y = 50;
@@ -666,24 +820,17 @@
           pdf.text(`${index + 1}.`, margin, y);
           pdf.text(cat.name, margin + 15, y);
           pdf.text(`${count} photo${count > 1 ? 's' : ''}`, pageW - margin - 30, y);
-          
-          // Dotted line
           const dots = '.'.repeat(Math.floor((pageW - margin - 80 - pdf.getTextWidth(cat.name)) / 2));
           pdf.setTextColor(150);
           pdf.text(dots, margin + 15 + pdf.getTextWidth(cat.name) + 5, y);
           pdf.setTextColor(0);
-          
           y += 15;
         }
       });
     }
 
     async function exportToPDF(){
-      if (!photos.length){ 
-        showToast('Aucune photo à exporter','error'); 
-        return; 
-      }
-      
+      if (!photos.length){ showToast('Aucune photo à exporter','error'); return; }
       if (document.getElementById('validateFields').checked && !validatePhotoFields()){ 
         showToast('Veuillez remplir tous les champs','error'); 
         highlightMissingFields(); 
@@ -693,9 +840,7 @@
       const loading=document.getElementById('loadingSection'); 
       const btn=document.getElementById('exportButton'); 
       const bar=document.getElementById('progressBar');
-      
-      loading.style.display='block'; 
-      btn.disabled=true;
+      loading.style.display='block'; btn.disabled=true;
 
       try{
         const { jsPDF } = window.jspdf; 
@@ -707,7 +852,7 @@
         const footerH=15;
         const contentH=pageH - headerH - footerH - margin*2;
         const maxW=pageW - 2*margin;
-        const maxH=contentH/2 - 40; // Space for 2 photos per page + details
+        const maxH=contentH/2 - 40;
         const quality = document.getElementById('highQuality').checked ? 0.9 : 0.7;
 
         bar.style.width='5%';
@@ -730,50 +875,35 @@
           commissioningEnd: document.getElementById('commissioningEnd').value || ''
         };
 
-        // Cover page
         await addCoverPage(pdf, info);
         bar.style.width='15%';
 
-        // Table of contents
         if (document.getElementById('includeTableOfContents').checked) {
           const categoryStats = {};
-          categories.forEach(cat => {
-            categoryStats[cat.id] = photos.filter(p => p.category === cat.id).length;
-          });
+          categories.forEach(cat => { categoryStats[cat.id] = photos.filter(p => p.category === cat.id).length; });
           await addTableOfContents(pdf, categoryStats);
         }
         bar.style.width='25%';
 
         const addHeader=(pageNum)=>{ 
-          pdf.setFillColor(245,245,245);
-          pdf.rect(0, 0, pageW, headerH);
-          pdf.setFontSize(10); 
-          pdf.setTextColor(100); 
-          pdf.setFont('helvetica','normal');
+          pdf.setFillColor(245,245,245); pdf.rect(0, 0, pageW, headerH);
+          pdf.setFontSize(10); pdf.setTextColor(100); pdf.setFont('helvetica','normal');
           pdf.text(`Rapport Photo - ${info.affaire || 'Projet'}`, margin, 12);
           pdf.text(`Page ${pageNum}`, pageW-margin, 12, {align:'right'});
         };
-        
         const addFooter=()=>{ 
-          pdf.setFontSize(8); 
-          pdf.setTextColor(150); 
+          pdf.setFontSize(8); pdf.setTextColor(150); 
           const d=new Date().toLocaleDateString('fr-FR'); 
           pdf.text(`Généré le ${d}`, margin, pageH-5); 
           pdf.text(info.agence||'Equans', pageW-margin, pageH-5, {align:'right'}); 
         };
 
-        // Group photos by category if option is selected
         let photoGroups;
         if (document.getElementById('groupByCategory').checked) {
           photoGroups = {};
           categories.forEach(c => photoGroups[c.id] = []);
-          photos.forEach(p => {
-            if(!photoGroups[p.category]) photoGroups[p.category] = [];
-            photoGroups[p.category].push(p);
-          });
-          Object.keys(photoGroups).forEach(k => {
-            photoGroups[k].sort((a,b) => a.stepNumber - b.stepNumber);
-          });
+          photos.forEach(p => { if(!photoGroups[p.category]) photoGroups[p.category] = []; photoGroups[p.category].push(p); });
+          Object.keys(photoGroups).forEach(k => { photoGroups[k].sort((a,b) => a.stepNumber - b.stepNumber); });
         } else {
           photoGroups = { 'all': [...photos].sort((a,b) => a.stepNumber - b.stepNumber) };
         }
@@ -783,7 +913,6 @@
 
         for (const [groupKey, photoList] of Object.entries(photoGroups)) {
           if (!photoList.length) continue;
-
           const categoryInfo = categories.find(c => c.id === groupKey);
           let photoIndex = 0;
 
@@ -794,50 +923,33 @@
 
             let yCursor = headerH + margin;
 
-            // Category header (if grouping by category)
             if (document.getElementById('groupByCategory').checked && categoryInfo) {
               pdf.setFillColor(25,72,78);
               pdf.rect(margin, yCursor, pageW - 2*margin, 20, 'F');
-              pdf.setTextColor(255);
-              pdf.setFont('helvetica','bold');
-              pdf.setFontSize(14);
+              pdf.setTextColor(255); pdf.setFont('helvetica','bold'); pdf.setFontSize(14);
               pdf.text(`${categoryInfo.name}`, margin + 8, yCursor + 13);
               yCursor += 25;
             }
 
-            // Add up to 2 photos per page
             const photosOnThisPage = Math.min(2, photoList.length - photoIndex);
-            
             for (let slot = 0; slot < photosOnThisPage; slot++) {
               const photo = photoList[photoIndex + slot];
-              
-              // Load and add image
-              const img = new Image();
-              img.src = photo.dataUrl;
-              await new Promise(resolve => {
-                img.onload = resolve;
-                img.onerror = resolve;
-              });
+              const img = new Image(); img.src = photo.dataUrl;
+              await new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
 
-              // Calculate dimensions
               const ratio = img.width / img.height;
-              let imgW = maxW * 0.8; // Use 80% of available width
+              let imgW = (pageW - 2*margin) * 0.8;
               let imgH = imgW / ratio;
-              
-              if (imgH > maxH) {
-                imgH = maxH;
-                imgW = imgH * ratio;
-              }
+              const maxW2 = (pageW - 2*margin);
+              const contentH2 = pageH - headerH - 15 - margin*2;
+              const maxH2 = contentH2/2 - 40;
+              if (imgH > maxH2) { imgH = maxH2; imgW = imgH * ratio; }
 
-              const imgX = margin + (maxW - imgW) / 2;
+              const imgX = margin + (maxW2 - imgW) / 2;
               const imgY = yCursor;
 
-              // Add image with border
-              pdf.setDrawColor(200);
-              pdf.setLineWidth(0.5);
+              pdf.setDrawColor(200); pdf.setLineWidth(0.5);
               pdf.rect(imgX - 2, imgY - 2, imgW + 4, imgH + 4);
-              
-              // Rotate if needed
               if (photo.rotation && photo.rotation !== 0) {
                 pdf.saveGraphicsState();
                 const centerX = imgX + imgW/2;
@@ -855,77 +967,57 @@
                 pdf.addImage(img, 'JPEG', imgX, imgY, imgW, imgH, '', 'FAST');
               }
 
-              // FIXED: Add photo details with proper formatting
               if (document.getElementById('showPhotoDetails').checked) {
                 const detailsY = imgY + imgH + 8;
-                
-                // Photo title/designation
-                pdf.setTextColor(0);
-                pdf.setFont('helvetica','bold');
-                pdf.setFontSize(12);
+                pdf.setTextColor(0); pdf.setFont('helvetica','bold'); pdf.setFontSize(12);
                 pdf.text(photo.designation || `Photo ${photo.id}`, pageW/2, detailsY, {align:'center'});
-                
-                // FIXED: Photo details with step number, date, time, and category
-                pdf.setFont('helvetica','normal');
-                pdf.setFontSize(10);
-                pdf.setTextColor(100);
-                
+                pdf.setFont('helvetica','normal'); pdf.setFontSize(10); pdf.setTextColor(100);
                 const stepText = `Étape: ${photo.stepNumber || 'N/A'}`;
                 const dateText = `Date: ${formatDate(photo.date) || 'N/A'}`;
                 const timeText = `Heure: ${formatTime(photo.time) || 'N/A'}`;
                 const categoryText = `Catégorie: ${getCategoryName(photo.category)}`;
-                
-                // Display details in two lines
                 const line1 = `${stepText} • ${dateText} • ${timeText}`;
                 const line2 = categoryText;
-                
                 pdf.text(line1, pageW/2, detailsY + 12, {align:'center'});
                 pdf.text(line2, pageW/2, detailsY + 22, {align:'center'});
               }
 
-              // Move cursor for next photo
-              if (slot === 0) {
-                yCursor = headerH + margin + (contentH / 2) + 15;
-              }
-
-              totalProgress += progressPerPhoto;
-              bar.style.width = Math.min(95, totalProgress) + '%';
+              if (slot === 0) { yCursor = headerH + margin + (contentH / 2) + 15; }
+              totalProgress += progressPerPhoto; bar.style.width = Math.min(95, totalProgress) + '%';
             }
-
             photoIndex += photosOnThisPage;
             addFooter();
           }
         }
 
-        // Add page numbers to all pages
+        // Numérotation de pages
         const totalPages = pdf.internal.getNumberOfPages();
-        for (let i = 1; i <= totalPages; i++) {
-          pdf.setPage(i);
-          addFooter();
-        }
-
+        for (let i = 1; i <= totalPages; i++) { pdf.setPage(i); addFooter(); }
         bar.style.width = '100%';
 
-        // Generate filename
         const fileName = `rapport-photos-${(info.affaire || 'projet').replace(/[^a-z0-9\-_]+/gi, '_').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`;
-        
-        pdf.save(fileName);
-        showToast('Rapport PDF professionnel généré avec succès !', 'success');
-        
+
+        // ---- ZIP activé par défaut : PDF + dossiers de photos par catégorie
+        const pdfBlob = pdf.output('blob');
+        if (document.getElementById('zipPackage')?.checked) {
+          await exportZipWithPhotos(pdfBlob, fileName);
+          showToast('ZIP (PDF + photos classées) généré avec succès !', 'success');
+        } else {
+          saveAs(pdfBlob, fileName); // PDF seul
+          showToast('Rapport PDF généré avec succès !', 'success');
+        }
       } catch(e) {
-        console.error(e); 
-        showToast('Erreur lors de la génération du PDF', 'error');
+        console.error(e); showToast('Erreur lors de la génération du PDF/ZIP', 'error');
       } finally {
-        loading.style.display = 'none'; 
-        btn.disabled = false; 
-        bar.style.width = '0';
+        document.getElementById('loadingSection').style.display = 'none'; 
+        document.getElementById('exportButton').disabled = false; 
+        document.getElementById('progressBar').style.width = '0';
       }
     }
 
     function validatePhotoFields(){
       for (const p of photos){ 
-        if(!p.designation || !p.category || isNaN(p.stepNumber) || !p.date || !p.time) 
-          return false; 
+        if(!p.designation || !p.category || isNaN(p.stepNumber) || !p.date || !p.time) return false; 
       }
       return true;
     }
@@ -935,30 +1027,17 @@
         const inputs = item.querySelectorAll('input'); 
         let hasMissing = false;
         inputs.forEach(input => { 
-          if(!input.value){ 
-            input.style.borderColor = '#e74c3c'; 
-            hasMissing = true; 
-          } else {
-            input.style.borderColor = ''; 
-          }
+          if(!input.value){ input.style.borderColor = '#e74c3c'; hasMissing = true; } 
+          else { input.style.borderColor = ''; }
         });
         const select = item.querySelector('select'); 
-        if(!select.value){ 
-          select.style.borderColor = '#e74c3c'; 
-          hasMissing = true; 
-        } else {
-          select.style.borderColor = '';
-        }
+        if(!select.value){ select.style.borderColor = '#e74c3c'; hasMissing = true; } 
+        else { select.style.borderColor = ''; }
         item.style.boxShadow = hasMissing ? '0 0 0 2px rgba(231,76,60,.25)' : '';
       });
     }
 
-    function ts(){ 
-      return new Date().toISOString().replace(/:/g,'-').replace(/\./g, '-');
-    }
+    function ts(){ return new Date().toISOString().replace(/:/g,'-').replace(/\./g, '-'); }
   </script>
 </body>
 </html>
-
-
-
