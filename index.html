@@ -7,2023 +7,956 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary-dark: #04243c;
-            --primary: #19484e;
-            --primary-light: #2a6e7a;
-            --accent: #5fa586;
-            --accent-light: #8fc9b3;
-            --light: #f8f9fa;
-            --dark: #333;
-            --gray: #7f8c8d;
-            --light-gray: #ecf0f1;
-            --error: #e74c3c;
-            --warning: #f39c12;
-            --success: #27ae60;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary-light));
-            min-height: 100vh;
-            padding: 20px;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-            position: relative;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
-            color: white;
-            padding: 30px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
-        }
-
-        .logo-container {
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo {
-            height: 60px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
-        }
-
-        .header h1 {
-            font-size: 2.8rem;
-            margin-bottom: 10px;
-            font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            position: relative;
-        }
-
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .content {
-            padding: 40px;
-        }
-
-        .section-title {
-            font-size: 1.4rem;
-            margin-bottom: 25px;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--light-gray);
-        }
-
-        .section-title i {
-            background: var(--primary);
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .project-info-section {
-            background: linear-gradient(to bottom, var(--primary), var(--primary-dark));
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .project-info-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2304243c' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
-            opacity: 0.05;
-        }
-
-        .project-info-title {
-            font-size: 1.4rem;
-            margin-bottom: 25px;
-            color: white;
-            text-align: center;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .project-info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .info-field {
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .info-field label {
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--accent-light);
-            font-size: 0.95rem;
-        }
-
-        .info-field input {
-            padding: 14px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
-        }
-
-        .info-field input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .info-field input:focus {
-            outline: none;
-            border-color: var(--accent);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 0 0 3px rgba(95, 165, 134, 0.3);
-        }
-
-        .upload-section {
-            background: white;
-            border-radius: 12px;
-            padding: 35px;
-            margin-bottom: 30px;
-            border: 2px dashed var(--primary);
-            text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .upload-section:hover {
-            border-color: var(--accent);
-            background: #f5f9ff;
-        }
-
-        .upload-section.dragover {
-            border-color: var(--accent);
-            background: rgba(143, 201, 179, 0.1);
-        }
-
-        .upload-button {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            padding: 15px 35px;
-            border-radius: 30px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 10px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            font-weight: 600;
-            box-shadow: 0 5px 15px rgba(25, 72, 78, 0.3);
-        }
-
-        .upload-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(25, 72, 78, 0.4);
-        }
-
-        .upload-button:active {
-            transform: translateY(0);
-        }
-
-        .upload-button i {
-            font-size: 1.2rem;
-        }
-
-        .tabs {
-            display: flex;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--light-gray);
-            position: relative;
-        }
-
-        .tab {
-            padding: 15px 30px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            color: var(--gray);
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .tab.active {
-            color: var(--primary);
-            border-bottom-color: var(--accent);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .categories-section {
-            background: var(--light);
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .category-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid var(--light-gray);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .category-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .category-card.selected {
-            border-color: var(--accent);
-            background: rgba(143, 201, 179, 0.05);
-            box-shadow: 0 0 0 3px rgba(95, 165, 134, 0.2);
-        }
-
-        .category-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 15px;
-        }
-
-        .category-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--primary-dark);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .category-count {
-            background: var(--accent);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.9rem;
-            min-width: 30px;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        .category-card.selected .category-count {
-            background: var(--primary);
-        }
-
-        .category-description {
-            font-size: 0.95rem;
-            color: var(--gray);
-            margin-bottom: 15px;
-            line-height: 1.5;
-        }
-
-        .category-photos {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            min-height: 60px;
-            border: 1px dashed var(--light-gray);
-            border-radius: 8px;
-            padding: 10px;
-            background: var(--light);
-        }
-
-        .category-photos.empty {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--gray);
-            font-style: italic;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='1' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'%3E%3C/circle%3E%3Cpolyline points='21 15 16 10 5 21'%3E%3C/polyline%3E%3C/svg%3E") center no-repeat;
-            background-size: 30px;
-            background-position: center 10px;
-            padding-top: 45px;
-        }
-
-        .category-thumb {
-            width: 55px;
-            height: 55px;
-            border-radius: 5px;
-            object-fit: cover;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s ease;
-        }
-
-        .category-thumb:hover {
-            transform: scale(1.1);
-            z-index: 2;
-        }
-
-        .photos-container {
-            margin-top: 20px;
-        }
-
-        .sort-controls {
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-            flex-wrap: wrap;
-        }
-
-        .sort-button {
-            background: var(--light);
-            border: 1px solid var(--light-gray);
-            padding: 8px 16px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-        }
-
-        .sort-button:hover {
-            background: #e3f2fd;
-            border-color: #bbdefb;
-        }
-
-        .sort-button.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .sort-button.clear {
-            background: var(--error);
-            color: white;
-            border-color: var(--error);
-        }
-
-        .sort-button.clear:hover {
-            background: #c0392b;
-            border-color: #c0392b;
-        }
-
-        .photos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-            gap: 30px;
-        }
-
-        .photo-item {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .photo-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .photo-container {
-            position: relative;
-            height: 270px;
-            overflow: hidden;
-        }
-
-        .photo-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .photo-item:hover .photo-img {
-            transform: scale(1.05);
-        }
-
-        .photo-controls {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 8px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 6px;
-            border-radius: 30px;
-        }
-
-        .control-btn {
-            background: none;
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            transition: all 0.2s ease;
-        }
-
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .control-btn.delete:hover {
-            color: var(--error);
-        }
-
-        .control-btn.rotate:hover {
-            color: var(--accent);
-        }
-
-        .category-badge {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(52, 152, 219, 0.9);
-            color: white;
-            padding: 6px 15px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .photo-info {
-            padding: 20px;
-        }
-
-        .photo-info input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--light-gray);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-            margin-bottom: 12px;
-        }
-
-        .photo-info input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(25, 72, 78, 0.2);
-        }
-
-        .photo-info select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid var(--light-gray);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-            background: white;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2319484e' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 15px center;
-            background-size: 12px;
-        }
-
-        .photo-info select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(25, 72, 78, 0.2);
-        }
-
-        .photo-details {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .photo-details input {
-            margin-bottom: 0;
-        }
-
-        .export-section {
-            text-align: center;
-            margin-top: 40px;
-            padding: 40px;
-            background: linear-gradient(to bottom, var(--light), white);
-            border-radius: 15px;
-            border: 1px solid var(--light-gray);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        .export-button {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            border: none;
-            padding: 18px 45px;
-            border-radius: 30px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 8px 20px rgba(25, 72, 78, 0.4);
-        }
-
-        .export-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(25, 72, 78, 0.5);
-        }
-
-        .export-button:disabled {
-            background: var(--gray);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-            opacity: 0.7;
-        }
-
-        .photo-count {
-            font-size: 1.2rem;
-            color: var(--gray);
-            margin-bottom: 20px;
-            font-weight: 500;
-        }
-
-        .validation-check {
-            margin-top: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1rem;
-            color: var(--gray);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--gray);
-            background: var(--light);
-            border-radius: 12px;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.03);
-        }
-
-        .empty-state i {
-            font-size: 5rem;
-            margin-bottom: 20px;
-            color: var(--light-gray);
-        }
-
-        .empty-state h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: var(--primary);
-        }
-
-        .empty-state p {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            color: var(--primary);
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid var(--light-gray);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .progress-bar {
-            height: 6px;
-            background: var(--light-gray);
-            border-radius: 3px;
-            margin: 20px auto 10px;
-            max-width: 300px;
-            overflow: hidden;
-        }
-
-        .progress {
-            height: 100%;
-            background: var(--accent);
-            width: 0;
-            transition: width 0.3s ease;
-        }
-
-        .toast {
-            position: fixed;
-            top: 30px;
-            right: 30px;
-            background: var(--primary);
-            color: white;
-            padding: 18px 25px;
-            border-radius: 8px;
-            z-index: 1000;
-            transform: translateX(120%);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.error {
-            background: var(--error);
-        }
-
-        .toast.warning {
-            background: var(--warning);
-        }
-
-        .toast i {
-            font-size: 1.4rem;
-        }
-
-        /* Modal pour la caméra */
-        .camera-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.92);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .camera-container {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-        }
-
-        .camera-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--light-gray);
-        }
-
-        .camera-header h3 {
-            color: var(--primary-dark);
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .close-camera {
-            background: var(--error);
-            color: white;
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-
-        .close-camera:hover {
-            transform: rotate(90deg);
-        }
-
-        .camera-preview {
-            width: 100%;
-            height: 450px;
-            background: #222;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #cameraFeed {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .camera-controls {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .camera-btn {
-            padding: 14px 35px;
-            border-radius: 30px;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 600;
-        }
-
-        .capture-btn {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            box-shadow: 0 5px 15px rgba(25, 72, 78, 0.4);
-        }
-
-        .capture-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(25, 72, 78, 0.5);
-        }
-
-        .cancel-btn {
-            background: var(--light);
-            color: var(--dark);
-            border: 1px solid var(--light-gray);
-        }
-
-        .cancel-btn:hover {
-            background: #e9ecef;
-        }
-
-        .camera-switch {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .camera-switch:hover {
-            background: rgba(0, 0, 0, 0.9);
-        }
-
-        .photo-counter {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-        }
-
-        /* Modal pour choisir la catégorie */
-        .category-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .category-modal-content {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            width: 90%;
-            max-width: 600px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-        }
-
-        .category-modal-header {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--light-gray);
-        }
-
-        .category-modal-body {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .category-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 15px;
-        }
-
-        .category-option {
-            padding: 15px;
-            background: var(--light);
-            border: 1px solid var(--light-gray);
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-        }
-
-        .category-option:hover {
-            background: var(--accent-light);
-            color: white;
-        }
-
-        .preview-container {
-            width: 100%;
-            height: 200px;
-            border: 1px dashed var(--primary);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        #pendingPhotoPreview {
-            max-width: 100%;
-            max-height: 100%;
-        }
-
-        .category-modal-footer {
-            margin-top: 20px;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        @media (max-width: 1024px) {
-            .photos-grid {
-                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                padding: 20px;
-            }
-            
-            .header h1 {
-                font-size: 2.2rem;
-            }
-            
-            .content {
-                padding: 25px;
-            }
-            
-            .project-info-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .photos-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .categories-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .tabs {
-                flex-direction: column;
-            }
-            
-            .tab {
-                justify-content: center;
-            }
-            
-            .sort-controls {
-                justify-content: center;
-            }
-            
-            .camera-container {
-                width: 95%;
-                padding: 20px;
-            }
-            
-            .camera-preview {
-                height: 350px;
-            }
-            
-            .camera-controls {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .camera-btn {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .photo-details {
-                flex-direction: column;
-            }
-            
-            .photo-details input {
-                width: 100%;
-            }
-            
-            .upload-button {
-                width: 100%;
-                margin: 5px 0;
-            }
-            
-            .camera-preview {
-                height: 300px;
-            }
-        }
-    </style>
+    
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --primary-dark:#04243c;--primary:#19484e;--primary-light:#2a6e7a;--accent:#5fa586;
+      --accent-light:#8fc9b3;--light:#f8f9fa;--dark:#333;--gray:#7f8c8d;--light-gray:#ecf0f1;
+      --error:#e74c3c;--warning:#f39c12;--success:#27ae60;
+    }
+    body{font-family:Segoe UI, Tahoma, Geneva, Verdana, sans-serif;background:linear-gradient(135deg,var(--primary-dark),var(--primary-light));min-height:100vh;padding:20px;color:var(--dark)}
+    .container{max-width:1400px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 15px 50px rgba(0,0,0,.15);overflow:hidden;border:1px solid rgba(0,0,0,.05)}
+    .header{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;padding:30px;text-align:center}
+    .logo-container{margin-bottom:20px;display:flex;justify-content:center;gap:15px}
+    .logo{height:60px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.2))}
+    .header h1{font-size:2.6rem;font-weight:600;text-shadow:0 2px 4px rgba(0,0,0,.2)}
+    .content{padding:40px}
+
+    .section-title{font-size:1.4rem;margin-bottom:25px;color:var(--primary);display:flex;align-items:center;gap:10px;padding-bottom:10px;border-bottom:2px solid var(--light-gray)}
+    .section-title i{background:var(--primary);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+    .project-info-section{background:linear-gradient(to bottom,var(--primary),var(--primary-dark));border-radius:12px;padding:30px;margin-bottom:30px;border:1px solid rgba(255,255,255,.1);color:#fff}
+    .project-info-title{font-size:1.4rem;margin-bottom:25px;text-align:center;display:flex;align-items:center;justify-content:center;gap:10px}
+    .project-info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+    .info-field{display:flex;flex-direction:column}
+    .info-field label{font-weight:600;margin-bottom:8px;color:var(--accent-light);font-size:.95rem}
+    .info-field input{padding:12px 14px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.1);color:#fff}
+    .info-field input::placeholder{color:rgba(255,255,255,.6)}
+    .info-field input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(95,165,134,.25)}
+
+    .upload-section{background:#fff;border-radius:12px;padding:35px;margin-bottom:30px;border:2px dashed var(--primary);text-align:center;box-shadow:0 5px 20px rgba(0,0,0,.05)}
+    .upload-button{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border:none;padding:14px 26px;border-radius:28px;font-size:1rem;cursor:pointer;margin:8px;display:inline-flex;align-items:center;gap:10px;font-weight:600;transition:all 0.3s}
+    .upload-button:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.2)}
+
+    .tabs{display:flex;margin-bottom:30px;border-bottom:2px solid var(--light-gray)}
+    .tab{padding:14px 26px;background:none;border:none;cursor:pointer;color:var(--gray);border-bottom:3px solid transparent;font-weight:600}
+    .tab.active{color:var(--primary);border-bottom-color:var(--accent)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+
+    .categories-section{background:var(--light);border-radius:12px;padding:30px;margin-bottom:30px;box-shadow:0 5px 20px rgba(0,0,0,.05)}
+    .categories-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:25px}
+    .category-card{background:#fff;border-radius:10px;padding:20px;border:1px solid var(--light-gray);cursor:pointer;transition:all 0.3s}
+    .category-card.selected{box-shadow:0 0 0 3px rgba(95,165,134,.2)}
+    .category-card:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.1)}
+
+    .photos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:30px}
+    .photo-item{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.08);transition:all 0.3s}
+    .photo-item:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.15)}
+    .photo-container{position:relative;height:270px;overflow:hidden}
+    .photo-img{width:100%;height:100%;object-fit:cover}
+    .category-badge{position:absolute;top:15px;left:15px;background:rgba(52,152,219,.9);color:#fff;padding:6px 15px;border-radius:30px;font-size:.85rem;font-weight:600}
+    .photo-controls{position:absolute;top:15px;right:15px;display:flex;gap:8px;background:rgba(0,0,0,.6);padding:6px;border-radius:30px}
+    .control-btn{background:none;color:#fff;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer;transition:all 0.3s}
+    .control-btn:hover{background:rgba(255,255,255,0.2)}
+    .photo-info{padding:18px}
+    .photo-info input, .photo-info select{padding:8px;border:1px solid var(--light-gray);border-radius:6px;margin-bottom:8px;width:100%}
+    .photo-details{display:flex;gap:10px}
+    .photo-details input{margin-bottom:0}
+    @media (max-width:768px){.photos-grid{grid-template-columns:1fr}.photo-details{flex-direction:column}}
+
+    .export-section{text-align:center;margin-top:40px;padding:40px;background:linear-gradient(to bottom,var(--light),#fff);border-radius:15px;border:1px solid var(--light-gray)}
+    .export-button{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border:none;padding:16px 40px;border-radius:30px;font-size:1.1rem;font-weight:600;cursor:pointer;transition:all 0.3s}
+    .export-button:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,0,0,0.2)}
+    .photo-count{font-size:1.1rem;color:var(--gray);margin-bottom:16px}
+
+    .loading{display:none;text-align:center;padding:30px;color:var(--primary)}
+    .spinner{width:48px;height:48px;border:4px solid var(--light-gray);border-top:4px solid var(--primary);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .progress-bar{height:6px;background:var(--light-gray);border-radius:3px;max-width:300px;margin:10px auto 0;overflow:hidden}
+    .progress{height:100%;background:var(--accent);width:0;transition:width .3s}
+
+    .toast{position:fixed;top:30px;right:30px;background:var(--primary);color:#fff;padding:14px 18px;border-radius:8px;z-index:1000;transform:translateX(120%);transition:transform .4s}
+    .toast.show{transform:translateX(0)}
+    .toast.error{background:var(--error)} .toast.warning{background:var(--warning)}
+
+    .pdf-options{margin-top:20px;padding:20px;background:#f8f9fa;border-radius:10px;border:1px solid #e9ecef}
+    .pdf-options h4{margin-bottom:15px;color:var(--primary)}
+    .option-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .option-row label{font-size:14px;color:#495057;cursor:pointer}
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="logo-container">
-                <img src="https://upload.wikimedia.org/wikipedia/fr/0/0c/Equans_Logo.png" alt="Logo Equans" class="logo">
-            </div>
-            <h1><i class="fas fa-camera"></i> Reportage Photos </h1>
-            <p>Organiser les photos par catégorie et générer des rapports PDF</p>
-        </div>
-
-        <div class="content">
-            <!-- Section informations du projet -->
-            <div class="project-info-section">
-                <h3 class="project-info-title"><i class="fas fa-info-circle"></i> Informations du projet</h3>
-                <div class="project-info-grid">
-                    <div class="info-field">
-                        <label for="affaire"><i class="fas fa-building"></i> Affaire :</label>
-                        <input type="text" id="affaire" placeholder="Ex: GLOBAL SWITCH - CAMPUS PARIS CLICHY - PAR_E">
-                    </div>
-                    <div class="info-field">
-                        <label for="code"><i class="fas fa-barcode"></i> Code :</label>
-                        <input type="text" id="code" placeholder="Ex: P 1 1 8 6">
-                    </div>
-                    <div class="info-field">
-                        <label for="agence"><i class="fas fa-map-marker-alt"></i> Agence :</label>
-                        <input type="text" id="agence" placeholder="Ex: Agence Génie Climatique">
-                    </div>
-                    <div class="info-field">
-                        <label for="rapportType"><i class="fas fa-file-alt"></i> Type de rapport :</label>
-                        <input type="text" id="rapportType" placeholder="Ex: Rapport Photo IHM">
-                    </div>
-                    <div class="info-field">
-                        <label for="essais"><i class="fas fa-flask"></i> Essais :</label>
-                        <input type="text" id="essais" placeholder="Ex: ESSAIS L4">
-                    </div>
-                    <div class="info-field">
-                        <label for="rmu"><i class="fas fa-door-open"></i> Salle :</label>
-                        <input type="text" id="rmu" placeholder="Ex: HV/LV RMU L3D">
-                    </div>
-                </div>
-            </div>
-
-            <div class="upload-section" id="uploadSection">
-                <h3><i class="fas fa-cloud-upload-alt"></i> Importer des photos</h3>
-                <p>Prendre des photos directement ou sélectionnez-les depuis votre appareil</p>
-                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 25px; flex-wrap: wrap;">
-                    <button class="upload-button" onclick="document.getElementById('photoInput').click()">
-                        <i class="fas fa-folder-open"></i> Choisir des photos
-                    </button>
-                    <button class="upload-button" onclick="openCamera()">
-                        <i class="fas fa-camera"></i> Prendre une photo
-                    </button>
-                </div>
-                <input type="file" id="photoInput" accept="image/*" multiple style="display: none;">
-                <p style="margin-top: 20px; font-size: 0.95rem; color: var(--gray);">
-                    Formats acceptés : JPG, PNG | Taille max : 5Mo par photo
-                </p>
-            </div>
-
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('categories')">
-                    <i class="fas fa-folder"></i> Catégories
-                </button>
-                <button class="tab" onclick="switchTab('photos')">
-                    <i class="fas fa-images"></i> Toutes les photos
-                </button>
-            </div>
-
-            <div id="categoriesTab" class="tab-content active">
-                <div class="categories-section">
-                    <h3 class="section-title"><i class="fas fa-tasks"></i> Organisez vos photos par catégories</h3>
-                    <div class="categories-grid" id="categoriesGrid"></div>
-                </div>
-            </div>
-
-            <div id="photosTab" class="tab-content">
-                <div class="photos-container">
-                    <div class="sort-controls">
-                        <button class="sort-button" onclick="sortPhotos('stepNumber')">
-                            <i class="fas fa-sort-numeric-down"></i> Numéro d'étape
-                        </button>
-                        <button class="sort-button" onclick="sortPhotos('date')">
-                            <i class="fas fa-calendar-alt"></i> Date
-                        </button>
-                        <button class="sort-button" onclick="sortPhotos('category')">
-                            <i class="fas fa-folder"></i> Catégorie
-                        </button>
-                        <button class="sort-button clear" onclick="clearAllPhotos()">
-                            <i class="fas fa-trash-alt"></i> Vider toutes les images
-                        </button>
-                    </div>
-                    <div id="photosContainer">
-                        <div class="empty-state">
-                            <i class="fas fa-camera"></i>
-                            <h3>Aucune photo importée</h3>
-                            <p>Commencez par importer des photos de votre chantier ou prenez-en directement avec l'appareil photo</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="export-section" id="exportSection" style="display: none;">
-                <div class="photo-count" id="photoCount">0 photos importées</div>
-                <button class="export-button" id="exportButton" onclick="exportToPDF()">
-                    <i class="fas fa-file-pdf"></i> Générer le rapport PDF
-                </button>
-                <div class="validation-check">
-                    <input type="checkbox" id="validateFields" checked>
-                    <label for="validateFields">Vérifier que tous les champs sont remplis</label>
-                </div>
-            </div>
-
-            <div class="loading" id="loadingSection">
-                <div class="spinner"></div>
-                <p>Génération du rapport en cours...</p>
-                <div class="progress-bar">
-                    <div class="progress" id="progressBar"></div>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <div class="header">
+      <div class="logo-container">
+        <img class="logo" alt="Equans" src="https://upload.wikimedia.org/wikipedia/fr/0/0c/Equans_Logo.png">
+      </div>
+      <h1><i class="fas fa-camera"></i> Reportage Photos Professionnel</h1>
+      <p>Organiser les photos par catégorie et générer des rapports PDF de haute qualité</p>
     </div>
 
-    <!-- Modal pour la caméra -->
-    <div id="cameraModal" class="camera-modal">
-        <div class="camera-container">
-            <div class="camera-header">
-                <h3><i class="fas fa-camera"></i> Appareil photo</h3>
-                <button class="close-camera" onclick="closeCamera()">×</button>
-            </div>
-            <div class="camera-preview">
-                <video id="cameraFeed" autoplay playsinline></video>
-                <div class="photo-counter" id="photoCounter">0 photo(s)</div>
-                <button class="camera-switch" id="switchCamera">
-                    <i class="fas fa-sync-alt"></i> Changer de caméra
-                </button>
-            </div>
-            <div class="camera-controls">
-                <button class="camera-btn capture-btn" id="captureButton">
-                    <i class="fas fa-camera"></i> Prendre la photo
-                </button>
-                <button class="camera-btn cancel-btn" onclick="closeCamera()">
-                    <i class="fas fa-times"></i> Annuler
-                </button>
-            </div>
+    <div class="content">
+      <div class="project-info-section">
+        <h3 class="project-info-title"><i class="fas fa-info-circle"></i> Informations du projet</h3>
+        <div class="project-info-grid">
+          <div class="info-field"><label for="affaire"><i class="fas fa-building"></i> Affaire :</label><input id="affaire" placeholder="Ex: GSW PAR E Data Centre"></div>
+          <div class="info-field"><label for="code"><i class="fas fa-barcode"></i> Code :</label><input id="code" placeholder="Ex: P 1 1 8 6"></div>
+          <div class="info-field"><label for="agence"><i class="fas fa-map-marker-alt"></i> Agence :</label><input id="agence" placeholder="Ex: Agence Génie Climatique"></div>
+          <div class="info-field"><label for="rapportType"><i class="fas fa-file-alt"></i> Type de rapport :</label><input id="rapportType" placeholder="Ex: Functional testing"></div>
+          <div class="info-field"><label for="essais"><i class="fas fa-flask"></i> Essais :</label><input id="essais" placeholder="Ex: L4"></div>
+          <div class="info-field"><label for="rmu"><i class="fas fa-door-open"></i> Salle :</label><input id="rmu" placeholder="Ex: HV/LV RMU L3D"></div>
+          <div class="info-field"><label for="testScenario"><i class="fas fa-list-check"></i> Test scenario :</label><input id="testScenario" placeholder="Ex: TECHNICAL SUITE Heat Load Test"></div>
+          <div class="info-field"><label for="testPurpose"><i class="fas fa-bullseye"></i> Test purpose :</label><input id="testPurpose" placeholder="Ex: Verification of proper behaviour of the FANWALL"></div>
+          <div class="info-field"><label for="procedureVersion"><i class="fas fa-hashtag"></i> Procédure – Version :</label><input id="procedureVersion" placeholder="Ex: 1"></div>
+          <div class="info-field"><label for="panelTitle"><i class="fas fa-layer-group"></i> Panel/Bloc title :</label><input id="panelTitle" placeholder="Ex: FANWALLs"></div>
+          <div class="info-field"><label for="coverCategory"><i class="fas fa-tags"></i> Category (texte) :</label><input id="coverCategory" placeholder="Ex: Mechanical"></div>
+          <div class="info-field"><label for="siteReference"><i class="fas fa-location-dot"></i> Site reference :</label><input id="siteReference" placeholder="Ex: TS-L3D / Room 12"></div>
+          <div class="info-field"><label for="commissioningDate"><i class="fas fa-calendar-day"></i> Commissioning date :</label><input id="commissioningDate" type="date"></div>
+          <div class="info-field"><label for="commissioningStart"><i class="fas fa-clock"></i> Start time :</label><input id="commissioningStart" type="time"></div>
+          <div class="info-field"><label for="commissioningEnd"><i class="fas fa-clock"></i> End time :</label><input id="commissioningEnd" type="time"></div>
         </div>
-    </div>
+      </div>
 
-    <!-- Modal pour choisir la catégorie -->
-    <div id="categoryModal" class="category-modal">
-        <div class="category-modal-content">
-            <div class="category-modal-header">
-                <h3><i class="fas fa-folder"></i> Choisir une catégorie</h3>
-            </div>
-            <div class="category-modal-body">
-                <p>Sélectionnez la catégorie pour cette photo :</p>
-                <div class="category-options">
-                    <!-- Les boutons de catégorie seront générés ici -->
-                </div>
-                <div class="preview-container">
-                    <img id="pendingPhotoPreview" src="" alt="Aperçu de la photo">
-                </div>
-            </div>
-            <div class="category-modal-footer">
-                <button class="camera-btn cancel-btn" onclick="closeCategoryModal()">
-                    <i class="fas fa-times"></i> Annuler
-                </button>
-            </div>
+      <div id="uploadSection" class="upload-section">
+        <h3><i class="fas fa-cloud-upload-alt"></i> Importer des photos</h3>
+        <p>Faites une capture d'écran, utilisez la caméra ou importez des fichiers.</p>
+        <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:14px">
+          <button class="upload-button" onclick="document.getElementById('photoInput').click()"><i class="fas fa-folder-open"></i> Choisir des photos</button>
+          <button class="upload-button" onclick="openCamera()"><i class="fas fa-camera"></i> Prendre une photo</button>
+          <button class="upload-button" onclick="captureScreenshot()"><i class="fas fa-desktop"></i> Capture d'écran</button>
+          <button class="upload-button" onclick="captureContainer()" title="Capture de l'interface"><i class="fas fa-square"></i> Capture de l'interface</button>
         </div>
+        <input id="photoInput" type="file" accept="image/*" multiple style="display:none"/>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('categories')">Catégories</button>
+        <button class="tab" onclick="switchTab('photos')">Toutes les photos</button>
+      </div>
+
+      <div id="categoriesTab" class="tab-content active">
+        <div class="categories-section">
+          <h3 class="section-title"><i class="fas fa-tasks"></i> Organisez vos photos par catégories</h3>
+          <div id="categoriesGrid" class="categories-grid"></div>
+        </div>
+      </div>
+
+      <div id="photosTab" class="tab-content">
+        <div class="photos-container">
+          <div id="photosContainer">
+            <div class="empty-state" style="text-align:center;padding:40px;color:#6b7280">
+              <i class="fas fa-camera" style="font-size:48px"></i>
+              <h3>Aucune photo importée</h3>
+              <p>Importez, prenez une photo ou utilisez la capture d'écran.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="exportSection" class="export-section" style="display:none">
+        <div id="photoCount" class="photo-count">0 photos importées</div>
+        <button id="exportButton" class="export-button" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> Générer le rapport PDF professionnel</button>
+        
+        <div class="pdf-options">
+          <h4><i class="fas fa-cog"></i> Options PDF</h4>
+          <div class="option-row">
+            <input id="validateFields" type="checkbox" checked>
+            <label for="validateFields">Vérifier que tous les champs sont remplis</label>
+          </div>
+          <div class="option-row">
+            <input id="includeTableOfContents" type="checkbox" checked>
+            <label for="includeTableOfContents">Inclure une table des matières</label>
+          </div>
+          <div class="option-row">
+            <input id="groupByCategory" type="checkbox" checked>
+            <label for="groupByCategory">Grouper les photos par catégorie</label>
+          </div>
+          <div class="option-row">
+            <input id="showPhotoDetails" type="checkbox" checked>
+            <label for="showPhotoDetails">Afficher les détails sous chaque photo</label>
+          </div>
+          <div class="option-row">
+            <input id="highQuality" type="checkbox" checked>
+            <label for="highQuality">Haute qualité d'image (fichier plus volumineux)</label>
+          </div>
+        </div>
+      </div>
+
+      <div id="loadingSection" class="loading">
+        <div class="spinner"></div>
+        <p>Génération du rapport professionnel en cours...</p>
+        <div class="progress-bar"><div id="progressBar" class="progress"></div></div>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // Variables globales
-        let photos = [];
-        let photoCounter = 0;
-        let activeTab = 'categories';
-        let currentSort = 'stepNumber';
-        let stream = null;
-        let currentCamera = 'user'; // 'user' pour frontal, 'environment' pour arrière
-        let pendingPhoto = null; // Photo capturée en attente de catégorisation
+  <!-- Camera modal -->
+  <div id="cameraModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:2000;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:12px;max-width:800px;width:90%;padding:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h3><i class="fas fa-camera"></i> Appareil photo</h3>
+        <button onclick="closeCamera()" style="background:#e74c3c;color:#fff;border:none;width:36px;height:36px;border-radius:50%;cursor:pointer">×</button>
+      </div>
+      <div style="height:420px;background:#111;border-radius:8px;position:relative;overflow:hidden">
+        <video id="cameraFeed" autoplay playsinline style="width:100%;height:100%;object-fit:contain"></video>
+        <div id="photoCounter" style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);color:#fff;padding:6px 12px;border-radius:20px;font-size:.9rem">0 photo(s)</div>
+      </div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:14px">
+        <button id="captureButton" class="upload-button"><i class="fas fa-camera"></i> Prendre la photo</button>
+        <button class="upload-button" style="background:#e5e7eb;color:#111" onclick="closeCamera()"><i class="fas fa-times"></i> Annuler</button>
+      </div>
+    </div>
+  </div>
 
-        const categories = [
-            { id: 'etat_initial', name: 'État initial', icon: 'fas fa-flag', description: 'Photos de l\'état initial du chantier' },
-            { id: 'fire_detection', name: 'Fire Detection', icon: 'fas fa-fire-extinguisher', description: 'Système de détection incendie' },
-            { id: 'first_functional_test', name: 'First Functional Test', icon: 'fas fa-wrench', description: 'Premier test fonctionnel des équipements' },
-            { id: 'increasing_electrical_charge', name: 'Increasing Electrical Charge', icon: 'fas fa-bolt', description: 'Augmentation progressive de la charge électrique' },
-            { id: 'loss_crah_redundancy', name: 'Loss of CRAH redundancy', icon: 'fas fa-server', description: 'Perte de redondance CRAH dans RMU' },
-            { id: 'power_failure_crah', name: 'Power failure of CRAH-C', icon: 'fas fa-plug', description: 'Panne d\'alimentation CRAH-C et perte CRAC' },
-            { id: 'probes_loss_test', name: 'Probes Loss Test', icon: 'fas fa-thermometer-half', description: 'Test de perte de sondes' }
-        ];
+  <script>
+    // ===== Globals
+    let photos = [];
+    let photoCounter = 0;
+    let activeTab = 'categories';
+    let stream = null;
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            const photoInput = document.getElementById('photoInput');
-            const uploadSection = document.getElementById('uploadSection');
-            const captureButton = document.getElementById('captureButton');
-            const switchButton = document.getElementById('switchCamera');
+    const categories = [
+      { id:'etat_initial', name:'État initial', icon:'fas fa-flag', description:"Photos de l'état initial du chantier" },
+      { id:'fire_detection', name:'Fire Detection', icon:'fas fa-fire-extinguisher', description:'Système de détection incendie' },
+      { id:'first_functional_test', name:'First Functional Test', icon:'fas fa-wrench', description:'Premier test fonctionnel des équipements' },
+      { id:'increasing_electrical_charge', name:'Increasing Electrical Charge', icon:'fas fa-bolt', description:'Augmentation progressive de la charge électrique' },
+      { id:'loss_crah_redundancy', name:'Loss of CRAH redundancy', icon:'fas fa-server', description:'Perte de redondance CRAH dans RMU' },
+      { id:'power_failure_crah', name:'Power failure of CRAH-C', icon:'fas fa-plug', description:"Panne d'alimentation CRAH-C et perte CRAC" },
+      { id:'probes_loss_test', name:'Probes Loss Test', icon:'fas fa-thermometer-half', description:'Test de perte de sondes' }
+    ];
 
-            photoInput.addEventListener('change', handleFileSelect);
-            
-            // Drag & Drop
-            uploadSection.addEventListener('dragover', handleDragOver);
-            uploadSection.addEventListener('dragleave', handleDragLeave);
-            uploadSection.addEventListener('drop', handleDrop);
-            
-            // Événements pour la caméra
-            if (captureButton) captureButton.addEventListener('click', capturePhoto);
-            if (switchButton) switchButton.addEventListener('click', switchCamera);
+    document.addEventListener('DOMContentLoaded', () => {
+      const photoInput = document.getElementById('photoInput');
+      const uploadSection = document.getElementById('uploadSection');
+      const captureButton = document.getElementById('captureButton');
 
-            // Charger les données sauvegardées
-            loadSavedData();
-            
-            renderCategories();
-        });
+      photoInput.addEventListener('change', e => processFiles(e.target.files));
+      uploadSection.addEventListener('dragover', e => e.preventDefault());
+      uploadSection.addEventListener('drop', e => { e.preventDefault(); processFiles(e.dataTransfer.files); });
+      if (captureButton) captureButton.addEventListener('click', capturePhoto);
 
-        // Fonction pour charger les données sauvegardées
-        function loadSavedData() {
-            const savedPhotos = localStorage.getItem('chantierPhotos');
-            const savedProjectInfo = localStorage.getItem('chantierProjectInfo');
-            
-            if (savedPhotos) {
-                photos = JSON.parse(savedPhotos);
-                photoCounter = photos.length > 0 ? Math.max(...photos.map(p => p.id)) : 0;
-                updatePhotoCount();
-                if (photos.length > 0) {
-                    document.getElementById('exportSection').style.display = 'block';
-                }
+      loadSavedData();
+      renderCategories();
+    });
+
+    // ===== Persistence (using memory storage for Claude.ai compatibility)
+    function loadSavedData(){
+      renderCategories();
+    }
+    
+    function saveProjectInfo(){
+      // Memory storage - would save to server in real app
+    }
+    
+    function savePhotos(){
+      // Memory storage - would save to server in real app
+    }
+
+    // ===== UI helpers
+    function showToast(msg, type=''){ 
+      const t=document.createElement('div'); 
+      t.className=`toast ${type}`; 
+      t.textContent=msg; 
+      document.body.appendChild(t); 
+      setTimeout(()=>t.classList.add('show'),10); 
+      setTimeout(()=>{
+        t.classList.remove('show'); 
+        setTimeout(()=>t.remove(),250)
+      },3500); 
+    }
+    
+    function switchTab(tab){ 
+      activeTab=tab; 
+      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active')); 
+      document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active')); 
+      document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active'); 
+      document.getElementById(tab+'Tab').classList.add('active'); 
+      if (tab==='photos') renderPhotos(); else renderCategories(); 
+    }
+    
+    function selectCategory(id){ 
+      switchTab('photos'); 
+      renderPhotos(id); 
+    }
+    
+    function updatePhotoCount(){ 
+      const el=document.getElementById('photoCount'); 
+      if(el) el.textContent = `${photos.length} photo${photos.length>1?'s':''} importée${photos.length>1?'s':''}`;
+    }
+
+    // ===== Camera functions
+    async function openCamera(){ 
+      document.getElementById('cameraModal').style.display='flex'; 
+      try{ 
+        stream = await navigator.mediaDevices.getUserMedia({video:{width:{ideal:1280},height:{ideal:720}}}); 
+        document.getElementById('cameraFeed').srcObject = stream; 
+      }catch(e){ 
+        showToast("Impossible d'accéder à la caméra",'error'); 
+        closeCamera(); 
+      } 
+    }
+    
+    function closeCamera(){ 
+      document.getElementById('cameraModal').style.display='none'; 
+      if(stream){
+        stream.getTracks().forEach(t=>t.stop()); 
+        stream=null;
+      } 
+    }
+    
+    function capturePhoto(){ 
+      const v=document.getElementById('cameraFeed');
+      const c=document.createElement('canvas'); 
+      c.width=v.videoWidth; 
+      c.height=v.videoHeight; 
+      c.getContext('2d').drawImage(v,0,0); 
+      c.toBlob(async b=>{ 
+        const f=new File([b],`photo-${ts()}.jpg`,{type:'image/jpeg'}); 
+        await addPhoto(f); 
+        showToast('Photo ajoutée'); 
+        document.getElementById('photoCounter').textContent=`${photos.length} photo(s)`; 
+      },'image/jpeg',.9); 
+    }
+
+    // ===== Screen capture
+    async function captureScreenshot(){
+      try{
+        const displayStream = await navigator.mediaDevices.getDisplayMedia({ video:{cursor:'always'}, audio:false });
+        showToast('Capture dans 5 secondes… basculez sur la fenêtre choisie');
+        await new Promise(r=>setTimeout(r,5000));
+        const [track]=displayStream.getVideoTracks();
+        let blob;
+        if('ImageCapture' in window){
+          try{
+            const cap=new ImageCapture(track);
+            const bm=await cap.grabFrame();
+            const c=document.createElement('canvas'); 
+            c.width=bm.width; 
+            c.height=bm.height; 
+            c.getContext('2d').drawImage(bm,0,0);
+            blob = await new Promise(res=>c.toBlob(res,'image/png',.92));
+          }catch{ 
+            blob = await frameFromVideo(displayStream); 
+          }
+        }else{ 
+          blob = await frameFromVideo(displayStream); 
+        }
+        displayStream.getTracks().forEach(t=>t.stop());
+        const f=new File([blob],`screenshot-${ts()}.png`,{type:'image/png'}); 
+        await addPhoto(f); 
+        showToast("Capture d'écran ajoutée"); 
+        if(activeTab==='photos') renderPhotos(); else renderCategories(); 
+        updatePhotoCount(); 
+        document.getElementById('exportSection').style.display='block';
+      }catch(e){ 
+        showToast("Capture d'écran annulée ou refusée",'warning'); 
+      }
+    }
+    
+    async function frameFromVideo(stream){ 
+      const v=document.createElement('video'); 
+      v.srcObject=stream; 
+      v.playsInline=true; 
+      await v.play(); 
+      await new Promise(r=>requestAnimationFrame(r)); 
+      const c=document.createElement('canvas'); 
+      c.width=v.videoWidth; 
+      c.height=v.videoHeight; 
+      c.getContext('2d').drawImage(v,0,0); 
+      return await new Promise(res=>c.toBlob(res,'image/png',.92)); 
+    }
+
+    // ===== Capture UI container
+    async function captureContainer(){ 
+      const el=document.querySelector('.container'); 
+      const canvas=await html2canvas(el,{useCORS:true,scale:2,backgroundColor:'#fff'}); 
+      const blob=await new Promise(res=>canvas.toBlob(res,'image/png',.92)); 
+      const f=new File([blob],`interface-${ts()}.png`,{type:'image/png'}); 
+      await addPhoto(f); 
+      showToast("Capture interface ajoutée"); 
+      if(activeTab==='photos') renderPhotos(); else renderCategories(); 
+      updatePhotoCount(); 
+      document.getElementById('exportSection').style.display='block'; 
+    }
+
+    // ===== Photo management
+    async function processFiles(files){
+      for (const file of files){
+        if (!file.type.startsWith('image/')) { 
+          showToast('Format non supporté','error'); 
+          continue; 
+        }
+        if (file.size > 5*1024*1024){ 
+          showToast('Fichier > 5 Mo','error'); 
+          continue; 
+        }
+        await addPhoto(file);
+      }
+      if (activeTab==='photos') renderPhotos(); else renderCategories();
+      updatePhotoCount(); 
+      document.getElementById('exportSection').style.display='block';
+    }
+    
+    function addPhoto(file){ 
+      return new Promise(res=>{
+        const r=new FileReader(); 
+        r.onload=e=>{
+          const now=new Date(); 
+          photos.push({ 
+            id:++photoCounter, 
+            file, 
+            dataUrl:e.target.result, 
+            designation:`Photo ${photoCounter}`, 
+            filename:file.name, 
+            category:'etat_initial', 
+            stepNumber:photoCounter, 
+            date:now.toISOString().split('T')[0], 
+            time:now.toTimeString().slice(0,5), 
+            rotation:0 
+          }); 
+          savePhotos(); 
+          res(); 
+        }; 
+        r.readAsDataURL(file); 
+      }); 
+    }
+    
+    function rotatePhoto(id){ 
+      const p=photos.find(x=>x.id===id); 
+      if(p){ 
+        p.rotation=(p.rotation+90)%360; 
+        renderPhotos(); 
+      } 
+    }
+    
+    function updateDesignation(id,v){ 
+      const p=photos.find(x=>x.id===id); 
+      if(p){p.designation=v; savePhotos();} 
+    }
+    
+    function updateCategory(id,v){ 
+      const p=photos.find(x=>x.id===id); 
+      if(p){p.category=v; savePhotos(); renderPhotos(); renderCategories();} 
+    }
+    
+    function updateStepNumber(id,v){ 
+      const p=photos.find(x=>x.id===id); 
+      if(p){p.stepNumber=parseInt(v)||0; savePhotos();} 
+    }
+    
+    function updateDate(id,v){ 
+      const p=photos.find(x=>x.id===id); 
+      if(p){p.date=v; savePhotos();} 
+    }
+    
+    function updateTime(id,v){ 
+      const p=photos.find(x=>x.id===id); 
+      if(p){p.time=v; savePhotos();} 
+    }
+    
+    function removePhoto(id){ 
+      if(!confirm('Supprimer cette photo ?')) return; 
+      photos = photos.filter(p=>p.id!==id); 
+      savePhotos(); 
+      renderPhotos(); 
+      renderCategories(); 
+      updatePhotoCount(); 
+    }
+
+    function renderCategories(){
+      const container=document.getElementById('categoriesGrid');
+      container.innerHTML = categories.map(cat=>{
+        const items=photos.filter(p=>p.category===cat.id);
+        return `<div class="category-card ${items.length?'selected':''}" onclick="selectCategory('${cat.id}')">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div style="font-weight:700;color:#083344"><i class="${cat.icon}"></i> ${cat.name}</div>
+            <div style="background:#5fa586;color:#fff;padding:4px 10px;border-radius:14px;font-weight:600">${items.length}</div>
+          </div>
+          <div style="color:#6b7280">${cat.description}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderPhotos(filterCategory=null){
+      const container=document.getElementById('photosContainer');
+      if (!photos.length){
+        container.innerHTML = `<div class="empty-state" style="text-align:center;padding:40px;color:#6b7280"><i class="fas fa-camera" style="font-size:48px"></i><h3>Aucune photo importée</h3></div>`;
+        return;
+      }
+      let list=[...photos].sort((a,b)=>a.stepNumber-b.stepNumber);
+      if (filterCategory) list=list.filter(p=>p.category===filterCategory);
+
+      const html=list.map(p=>{
+        const catName = categories.find(c=>c.id===p.category)?.name || 'Non assignée';
+        const opts = categories.map(c=>`<option value="${c.id}" ${p.category===c.id?'selected':''}>${c.name}</option>`).join('');
+        return `<div class="photo-item">
+          <div class="photo-container">
+            <img class="photo-img" src="${p.dataUrl}" style="transform:rotate(${p.rotation}deg)"/>
+            <div class="category-badge"><i class="fas fa-folder"></i> ${catName}</div>
+            <div class="photo-controls">
+              <button class="control-btn" onclick="rotatePhoto(${p.id})" title="Rotation"><i class="fas fa-sync-alt"></i></button>
+              <button class="control-btn" onclick="removePhoto(${p.id})" title="Supprimer"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+          <div class="photo-info">
+            <input value="${p.designation}" onchange="updateDesignation(${p.id},this.value)" placeholder="Description de la photo">
+            <select onchange="updateCategory(${p.id},this.value)">${opts}</select>
+            <div class="photo-details">
+              <input type="number" value="${p.stepNumber}" onchange="updateStepNumber(${p.id},this.value)" placeholder="N° étape" min="0">
+              <input type="date" value="${p.date}" onchange="updateDate(${p.id},this.value)">
+              <input type="time" value="${p.time}" onchange="updateTime(${p.id},this.value)">
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+      container.innerHTML = `<div class="photos-grid">${html}</div>`;
+    }
+
+    // ===== Enhanced PDF Export with FIXED photo details display
+    function getCategoryName(id){ 
+      return (categories.find(c => c.id === id)?.name) || 'Non classée'; 
+    }
+
+    // FIXED: Format date function to handle French format properly
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const [year, month, day] = dateStr.split('-');
+      return `${day}/${month}/${year}`;
+    }
+
+    // FIXED: Format time function to handle 24h format properly
+    function formatTime(timeStr) {
+      if (!timeStr) return '';
+      return timeStr; // Time is already in HH:MM format
+    }
+
+    async function addCoverPage(pdf, info){
+      const pageW=pdf.internal.pageSize.getWidth();
+      const pageH=pdf.internal.pageSize.getHeight();
+      const margin=15;
+      const blue={r:25,g:72,b:78};
+
+      // Header with gradient effect
+      pdf.setFillColor(blue.r,blue.g,blue.b);
+      pdf.rect(0, 0, pageW, 50, 'F');
+      
+      // Add logos
+      try{
+        const eq=new Image(); 
+        eq.crossOrigin='anonymous'; 
+        eq.src='https://upload.wikimedia.org/wikipedia/fr/0/0c/Equans_Logo.png'; 
+        await new Promise(r=>{eq.onload=r; eq.onerror=r}); 
+        pdf.addImage(eq,'PNG', margin, 10, 50, 16);
+      }catch{}
+
+      // Title
+      pdf.setTextColor(255,255,255);
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(28);
+      pdf.text('RAPPORT PHOTO TECHNIQUE', pageW/2, 35, {align:'center'});
+
+      // Project info section
+      let y = 70;
+      pdf.setFillColor(248,249,250);
+      pdf.rect(margin, y, pageW-2*margin, 80, 'F');
+      pdf.setDrawColor(200);
+      pdf.rect(margin, y, pageW-2*margin, 80);
+
+      pdf.setTextColor(blue.r,blue.g,blue.b);
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica','bold');
+      pdf.text('INFORMATIONS PROJET', margin+10, y+15);
+
+      y += 25;
+      pdf.setTextColor(0);
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica','normal');
+
+      const leftCol = margin + 10;
+      const rightCol = pageW/2 + 10;
+      const lineHeight = 12;
+
+      // Left column
+      pdf.setFont('helvetica','bold');
+      pdf.text('Affaire:', leftCol, y);
+      pdf.setFont('helvetica','normal');
+      pdf.text(info.affaire || 'Non spécifié', leftCol + 25, y);
+      y += lineHeight;
+
+      pdf.setFont('helvetica','bold');
+      pdf.text('Code:', leftCol, y);
+      pdf.setFont('helvetica','normal');
+      pdf.text(info.code || 'Non spécifié', leftCol + 25, y);
+      y += lineHeight;
+
+      pdf.setFont('helvetica','bold');
+      pdf.text('Agence:', leftCol, y);
+      pdf.setFont('helvetica','normal');
+      pdf.text(info.agence || 'Non spécifié', leftCol + 25, y);
+
+      // Right column
+      y = 95;
+      pdf.setFont('helvetica','bold');
+      pdf.text('Type:', rightCol, y);
+      pdf.setFont('helvetica','normal');
+      pdf.text(info.rapportType || 'Functional testing', rightCol + 25, y);
+      y += lineHeight;
+
+      pdf.setFont('helvetica','bold');
+      pdf.text('Date:', rightCol, y);
+      pdf.setFont('helvetica','normal');
+      pdf.text(formatDate(info.commissioningDate) || new Date().toLocaleDateString('fr-FR'), rightCol + 25, y);
+      y += lineHeight;
+
+      pdf.setFont('helvetica','bold');
+      pdf.text('Salle:', rightCol, y);
+      pdf.setFont('helvetica','normal');
+      pdf.text(info.rmu || 'Non spécifié', rightCol + 25, y);
+
+      // Summary section
+      y = 170;
+      pdf.setFillColor(blue.r,blue.g,blue.b);
+      pdf.rect(margin, y, pageW-2*margin, 30, 'F');
+      pdf.setTextColor(255);
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica','bold');
+      pdf.text('RÉSUMÉ DU RAPPORT', margin+10, y+20);
+
+      y += 40;
+      pdf.setTextColor(0);
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica','normal');
+      
+      const totalPhotos = photos.length;
+      const categoriesUsed = [...new Set(photos.map(p => p.category))].length;
+      
+      pdf.text(`• Nombre total de photos: ${totalPhotos}`, margin+10, y);
+      pdf.text(`• Catégories utilisées: ${categoriesUsed}`, margin+10, y+12);
+      pdf.text(`• Date de génération: ${new Date().toLocaleDateString('fr-FR')} à ${new Date().toLocaleTimeString('fr-FR')}`, margin+10, y+24);
+
+      // Footer
+      pdf.setFontSize(8);
+      pdf.setTextColor(100);
+      pdf.text('Document généré automatiquement - Confidentiel', pageW/2, pageH-10, {align:'center'});
+    }
+
+    async function addTableOfContents(pdf, categoryStats){
+      pdf.addPage();
+      const pageW = pdf.internal.pageSize.getWidth();
+      const margin = 15;
+
+      // Header
+      pdf.setFillColor(25,72,78);
+      pdf.rect(0, 0, pageW, 30, 'F');
+      pdf.setTextColor(255);
+      pdf.setFont('helvetica','bold');
+      pdf.setFontSize(18);
+      pdf.text('TABLE DES MATIÈRES', pageW/2, 20, {align:'center'});
+
+      let y = 50;
+      pdf.setTextColor(0);
+      pdf.setFontSize(12);
+
+      Object.keys(categoryStats).forEach((catId, index) => {
+        const cat = categories.find(c => c.id === catId);
+        const count = categoryStats[catId];
+        if (count > 0 && cat) {
+          pdf.setFont('helvetica','normal');
+          pdf.text(`${index + 1}.`, margin, y);
+          pdf.text(cat.name, margin + 15, y);
+          pdf.text(`${count} photo${count > 1 ? 's' : ''}`, pageW - margin - 30, y);
+          
+          // Dotted line
+          const dots = '.'.repeat(Math.floor((pageW - margin - 80 - pdf.getTextWidth(cat.name)) / 2));
+          pdf.setTextColor(150);
+          pdf.text(dots, margin + 15 + pdf.getTextWidth(cat.name) + 5, y);
+          pdf.setTextColor(0);
+          
+          y += 15;
+        }
+      });
+    }
+
+    async function exportToPDF(){
+      if (!photos.length){ 
+        showToast('Aucune photo à exporter','error'); 
+        return; 
+      }
+      
+      if (document.getElementById('validateFields').checked && !validatePhotoFields()){ 
+        showToast('Veuillez remplir tous les champs','error'); 
+        highlightMissingFields(); 
+        return; 
+      }
+
+      const loading=document.getElementById('loadingSection'); 
+      const btn=document.getElementById('exportButton'); 
+      const bar=document.getElementById('progressBar');
+      
+      loading.style.display='block'; 
+      btn.disabled=true;
+
+      try{
+        const { jsPDF } = window.jspdf; 
+        const pdf=new jsPDF();
+        const pageW=pdf.internal.pageSize.width;
+        const pageH=pdf.internal.pageSize.height;
+        const margin=15;
+        const headerH=25;
+        const footerH=15;
+        const contentH=pageH - headerH - footerH - margin*2;
+        const maxW=pageW - 2*margin;
+        const maxH=contentH/2 - 40; // Space for 2 photos per page + details
+        const quality = document.getElementById('highQuality').checked ? 0.9 : 0.7;
+
+        bar.style.width='5%';
+
+        const info={
+          affaire: document.getElementById('affaire').value || '',
+          code: document.getElementById('code').value || '',
+          agence: document.getElementById('agence').value || '',
+          rapportType: document.getElementById('rapportType').value || 'Functional testing',
+          essais: document.getElementById('essais').value || 'L4',
+          rmu: document.getElementById('rmu').value || '',
+          testScenario: document.getElementById('testScenario').value || '',
+          testPurpose: document.getElementById('testPurpose').value || '',
+          procedureVersion: document.getElementById('procedureVersion').value || '1',
+          panelTitle: document.getElementById('panelTitle').value || 'FANWALLs',
+          coverCategory: document.getElementById('coverCategory').value || '',
+          siteReference: document.getElementById('siteReference').value || '',
+          commissioningDate: document.getElementById('commissioningDate').value || '',
+          commissioningStart: document.getElementById('commissioningStart').value || '',
+          commissioningEnd: document.getElementById('commissioningEnd').value || ''
+        };
+
+        // Cover page
+        await addCoverPage(pdf, info);
+        bar.style.width='15%';
+
+        // Table of contents
+        if (document.getElementById('includeTableOfContents').checked) {
+          const categoryStats = {};
+          categories.forEach(cat => {
+            categoryStats[cat.id] = photos.filter(p => p.category === cat.id).length;
+          });
+          await addTableOfContents(pdf, categoryStats);
+        }
+        bar.style.width='25%';
+
+        const addHeader=(pageNum)=>{ 
+          pdf.setFillColor(245,245,245);
+          pdf.rect(0, 0, pageW, headerH);
+          pdf.setFontSize(10); 
+          pdf.setTextColor(100); 
+          pdf.setFont('helvetica','normal');
+          pdf.text(`Rapport Photo - ${info.affaire || 'Projet'}`, margin, 12);
+          pdf.text(`Page ${pageNum}`, pageW-margin, 12, {align:'right'});
+        };
+        
+        const addFooter=()=>{ 
+          pdf.setFontSize(8); 
+          pdf.setTextColor(150); 
+          const d=new Date().toLocaleDateString('fr-FR'); 
+          pdf.text(`Généré le ${d}`, margin, pageH-5); 
+          pdf.text(info.agence||'Equans', pageW-margin, pageH-5, {align:'right'}); 
+        };
+
+        // Group photos by category if option is selected
+        let photoGroups;
+        if (document.getElementById('groupByCategory').checked) {
+          photoGroups = {};
+          categories.forEach(c => photoGroups[c.id] = []);
+          photos.forEach(p => {
+            if(!photoGroups[p.category]) photoGroups[p.category] = [];
+            photoGroups[p.category].push(p);
+          });
+          Object.keys(photoGroups).forEach(k => {
+            photoGroups[k].sort((a,b) => a.stepNumber - b.stepNumber);
+          });
+        } else {
+          photoGroups = { 'all': [...photos].sort((a,b) => a.stepNumber - b.stepNumber) };
+        }
+
+        let totalProgress = 35;
+        const progressPerPhoto = 60 / Math.max(1, photos.length);
+
+        for (const [groupKey, photoList] of Object.entries(photoGroups)) {
+          if (!photoList.length) continue;
+
+          const categoryInfo = categories.find(c => c.id === groupKey);
+          let photoIndex = 0;
+
+          while (photoIndex < photoList.length) {
+            pdf.addPage();
+            const currentPage = pdf.internal.getNumberOfPages();
+            addHeader(currentPage);
+
+            let yCursor = headerH + margin;
+
+            // Category header (if grouping by category)
+            if (document.getElementById('groupByCategory').checked && categoryInfo) {
+              pdf.setFillColor(25,72,78);
+              pdf.rect(margin, yCursor, pageW - 2*margin, 20, 'F');
+              pdf.setTextColor(255);
+              pdf.setFont('helvetica','bold');
+              pdf.setFontSize(14);
+              pdf.text(`${categoryInfo.name}`, margin + 8, yCursor + 13);
+              yCursor += 25;
             }
-            
-            if (savedProjectInfo) {
-                const projectInfo = JSON.parse(savedProjectInfo);
-                document.getElementById('affaire').value = projectInfo.affaire || '';
-                document.getElementById('code').value = projectInfo.code || '';
-                document.getElementById('agence').value = projectInfo.agence || '';
-                document.getElementById('rapportType').value = projectInfo.rapportType || '';
-                document.getElementById('essais').value = projectInfo.essais || '';
-                document.getElementById('rmu').value = projectInfo.rmu || '';
-            }
-            
-            // Sauvegarder automatiquement quand les champs changent
-            document.querySelectorAll('.project-info-grid input').forEach(input => {
-                input.addEventListener('input', saveProjectInfo);
-            });
-        }
 
-        // Sauvegarder les informations du projet
-        function saveProjectInfo() {
-            const projectInfo = {
-                affaire: document.getElementById('affaire').value,
-                code: document.getElementById('code').value,
-                agence: document.getElementById('agence').value,
-                rapportType: document.getElementById('rapportType').value,
-                essais: document.getElementById('essais').value,
-                rmu: document.getElementById('rmu').value
-            };
+            // Add up to 2 photos per page
+            const photosOnThisPage = Math.min(2, photoList.length - photoIndex);
             
-            localStorage.setItem('chantierProjectInfo', JSON.stringify(projectInfo));
-        }
+            for (let slot = 0; slot < photosOnThisPage; slot++) {
+              const photo = photoList[photoIndex + slot];
+              
+              // Load and add image
+              const img = new Image();
+              img.src = photo.dataUrl;
+              await new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve;
+              });
 
-        // Sauvegarder les photos
-        function savePhotos() {
-            const photosToSave = photos.map(photo => {
-                // Ne pas sauvegarder les dataUrl pour économiser de l'espace
-                const { dataUrl, ...rest } = photo;
-                return rest;
-            });
-            localStorage.setItem('chantierPhotos', JSON.stringify(photosToSave));
-        }
+              // Calculate dimensions
+              const ratio = img.width / img.height;
+              let imgW = maxW * 0.8; // Use 80% of available width
+              let imgH = imgW / ratio;
+              
+              if (imgH > maxH) {
+                imgH = maxH;
+                imgW = imgH * ratio;
+              }
 
-        // Fonctions globales
-        function switchTab(tabName) {
-            activeTab = tabName;
-            
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            
-            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
-            document.getElementById(`${tabName}Tab`).classList.add('active');
-            
-            if (tabName === 'photos') {
-                renderPhotos();
-            } else if (tabName === 'categories') {
-                renderCategories();
-            }
-        }
+              const imgX = margin + (maxW - imgW) / 2;
+              const imgY = yCursor;
 
-        function selectCategory(categoryId) {
-            switchTab('photos');
-            renderPhotos(categoryId);
-        }
+              // Add image with border
+              pdf.setDrawColor(200);
+              pdf.setLineWidth(0.5);
+              pdf.rect(imgX - 2, imgY - 2, imgW + 4, imgH + 4);
+              
+              // Rotate if needed
+              if (photo.rotation && photo.rotation !== 0) {
+                pdf.saveGraphicsState();
+                const centerX = imgX + imgW/2;
+                const centerY = imgY + imgH/2;
+                pdf.setGState(new pdf.GState({CTM: [
+                  Math.cos(photo.rotation * Math.PI / 180), 
+                  Math.sin(photo.rotation * Math.PI / 180),
+                  -Math.sin(photo.rotation * Math.PI / 180), 
+                  Math.cos(photo.rotation * Math.PI / 180),
+                  centerX, centerY
+                ]}));
+                pdf.addImage(img, 'JPEG', -imgW/2, -imgH/2, imgW, imgH, '', 'FAST');
+                pdf.restoreGraphicsState();
+              } else {
+                pdf.addImage(img, 'JPEG', imgX, imgY, imgW, imgH, '', 'FAST');
+              }
 
-        function sortPhotos(criteria) {
-            currentSort = criteria;
-            document.querySelectorAll('.sort-button').forEach(btn => {
-                btn.classList.toggle('active', btn.textContent.includes(criteria));
-            });
-            renderPhotos();
-        }
-
-        // Fonction pour vider toutes les photos
-        function clearAllPhotos() {
-            if (photos.length === 0) {
-                showToast('Il n\'y a aucune photo à supprimer', 'warning');
-                return;
-            }
-            
-            if (confirm('Voulez-vous vraiment supprimer toutes les photos ? Cette action est irréversible.')) {
-                photos = [];
-                photoCounter = 0;
-                savePhotos();
-                renderPhotos();
-                renderCategories();
-                updatePhotoCount();
-                document.getElementById('exportSection').style.display = 'none';
-                showToast('Toutes les photos ont été supprimées');
-            }
-        }
-
-        // Fonctions pour la caméra
-        async function openCamera() {
-            const modal = document.getElementById('cameraModal');
-            modal.style.display = 'flex';
-            document.getElementById('photoCounter').textContent = `${photos.length} photo(s)`;
-            
-            try {
-                // Démarrer la caméra
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: currentCamera,
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
-                    } 
-                });
+              // FIXED: Add photo details with proper formatting
+              if (document.getElementById('showPhotoDetails').checked) {
+                const detailsY = imgY + imgH + 8;
                 
-                const video = document.getElementById('cameraFeed');
-                video.srcObject = stream;
-            } catch (err) {
-                console.error('Erreur d\'accès à la caméra:', err);
-                showToast('Impossible d\'accéder à la caméra', 'error');
-                closeCamera();
-            }
-        }
-
-        function closeCamera() {
-            const modal = document.getElementById('cameraModal');
-            modal.style.display = 'none';
-            
-            // Arrêter le flux vidéo
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-                stream = null;
-            }
-        }
-
-        function switchCamera() {
-            currentCamera = currentCamera === 'user' ? 'environment' : 'user';
-            closeCamera();
-            setTimeout(openCamera, 300);
-        }
-
-        function capturePhoto() {
-            const video = document.getElementById('cameraFeed');
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            // Obtenir l'URL de données pour l'aperçu
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-            pendingPhoto = { dataUrl: dataUrl };
-            
-            // Fermer la caméra et ouvrir la modale de catégorie
-            closeCamera();
-            openCategoryModal();
-        }
-
-        function renderCategories() {
-            const container = document.getElementById('categoriesGrid');
-            const categoriesHTML = categories.map(category => {
-                const categoryPhotos = photos.filter(photo => photo.category === category.id);
-                const thumbsHTML = categoryPhotos.slice(0, 4).map(photo => 
-                    `<img src="${photo.dataUrl}" alt="${photo.designation}" class="category-thumb">`
-                ).join('');
-                
-                return `
-                    <div class="category-card ${categoryPhotos.length > 0 ? 'selected' : ''}" 
-                         onclick="selectCategory('${category.id}')">
-                        <div class="category-header">
-                            <div class="category-title">
-                                <i class="${category.icon}"></i> ${category.name}
-                            </div>
-                            <div class="category-count">${categoryPhotos.length}</div>
-                        </div>
-                        <div class="category-description">${category.description}</div>
-                        <div class="category-photos ${categoryPhotos.length === 0 ? 'empty' : ''}">
-                            ${categoryPhotos.length === 0 ? 'Aucune photo dans cette catégorie' : thumbsHTML}
-                            ${categoryPhotos.length > 4 ? `<div style="color: #7f8c8d; font-size: 0.8em; align-self: center;">+${categoryPhotos.length - 4}</div>` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            container.innerHTML = categoriesHTML;
-        }
-
-        function handleFileSelect(event) {
-            const files = event.target.files;
-            processFiles(files);
-        }
-
-        function handleDragOver(event) {
-            event.preventDefault();
-            event.currentTarget.classList.add('dragover');
-        }
-
-        function handleDragLeave(event) {
-            event.currentTarget.classList.remove('dragover');
-        }
-
-        function handleDrop(event) {
-            event.preventDefault();
-            event.currentTarget.classList.remove('dragover');
-            const files = event.dataTransfer.files;
-            processFiles(files);
-        }
-
-        async function processFiles(files) {
-            for (let file of files) {
-                if (file.type.startsWith('image/')) {
-                    if (file.size > 5 * 1024 * 1024) {
-                        showToast(`Fichier trop volumineux (${(file.size/(1024*1024)).toFixed(1)} Mo): ${file.name}`, 'error');
-                        continue;
-                    }
-                    await addPhoto(file);
-                } else {
-                    showToast('Format non supporté: ' + file.name, 'error');
-                }
-            }
-            
-            if (activeTab === 'photos') {
-                renderPhotos();
-            } else {
-                renderCategories();
-            }
-            
-            updatePhotoCount();
-            document.getElementById('exportSection').style.display = 'block';
-        }
-
-        function addPhoto(file) {
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const now = new Date();
-                    const photo = {
-                        id: ++photoCounter,
-                        file: file,
-                        dataUrl: e.target.result,
-                        designation: `Photo ${photoCounter}`,
-                        filename: file.name,
-                        category: 'etat_initial',
-                        stepNumber: photoCounter,
-                        date: now.toISOString().split('T')[0],
-                        time: now.toTimeString().split(' ')[0].slice(0, 5),
-                        rotation: 0
-                    };
-                    photos.push(photo);
-                    savePhotos();
-                    resolve();
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function rotatePhoto(photoId) {
-            const photo = photos.find(p => p.id === photoId);
-            if (photo) {
-                photo.rotation = (photo.rotation + 90) % 360;
-                renderPhotos();
-            }
-        }
-
-        function renderPhotos(filterCategory = null) {
-            const container = document.getElementById('photosContainer');
-            const exportSection = document.getElementById('exportSection');
-            
-            let photosToShow = [...photos];
-            
-            if (currentSort === 'stepNumber') {
-                photosToShow.sort((a, b) => a.stepNumber - b.stepNumber);
-            } else if (currentSort === 'date') {
-                photosToShow.sort((a, b) => {
-                    const dateA = new Date(a.date + 'T' + a.time);
-                    const dateB = new Date(b.date + 'T' + b.time);
-                    return dateA - dateB;
-                });
-            } else if (currentSort === 'category') {
-                photosToShow.sort((a, b) => {
-                    const catA = categories.find(c => c.id === a.category)?.name || '';
-                    const catB = categories.find(c => c.id === b.category)?.name || '';
-                    return catA.localeCompare(catB);
-                });
-            }
-            
-            if (filterCategory) {
-                photosToShow = photosToShow.filter(photo => photo.category === filterCategory);
-            }
-            
-            if (photos.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-camera"></i>
-                        <h3>Aucune photo importée</h3>
-                        <p>Commencez par importer des photos de votre chantier ou prenez-en directement avec l'appareil photo</p>
-                    </div>
-                `;
-                exportSection.style.display = 'none';
-                return;
-            }
-
-            exportSection.style.display = 'block';
-            
-            if (photosToShow.length === 0 && filterCategory) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-folder-open"></i>
-                        <h3>Aucune photo dans cette catégorie</h3>
-                        <p>Assignez des photos à cette catégorie ou importez-en de nouvelles</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const photosHTML = photosToShow.map(photo => {
-                const categoryName = categories.find(cat => cat.id === photo.category)?.name || 'Non assignée';
-                const categoryOptions = categories.map(cat => 
-                    `<option value="${cat.id}" ${photo.category === cat.id ? 'selected' : ''}>${cat.name}</option>`
-                ).join('');
-                
-                return `
-                    <div class="photo-item" data-id="${photo.id}">
-                        <div class="photo-container">
-                            <img src="${photo.dataUrl}" alt="${photo.designation}" 
-                                 class="photo-img" style="transform: rotate(${photo.rotation}deg);">
-                            <div class="category-badge">
-                                <i class="fas fa-folder"></i> ${categoryName}
-                            </div>
-                            <div class="photo-controls">
-                                <button class="control-btn rotate" title="Tourner" onclick="rotatePhoto(${photo.id})">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                                <button class="control-btn delete" title="Supprimer" onclick="removePhoto(${photo.id})">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="photo-info">
-                            <input type="text" value="${photo.designation}" 
-                                   placeholder="Description de la photo..." 
-                                   onchange="updateDesignation(${photo.id}, this.value)">
-                            <select onchange="updateCategory(${photo.id}, this.value)">
-                                <option value="">Sélectionnez une catégorie</option>
-                                ${categoryOptions}
-                            </select>
-                            <div class="photo-details">
-                                <input type="number" value="${photo.stepNumber}" 
-                                       placeholder="N° étape" 
-                                       onchange="updateStepNumber(${photo.id}, this.value)"
-                                       required>
-                                <input type="date" value="${photo.date}" 
-                                       onchange="updateDate(${photo.id}, this.value)"
-                                       required>
-                                <input type="time" value="${photo.time}" 
-                                       onchange="updateTime(${photo.id}, this.value)"
-                                       required>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            container.innerHTML = `
-                <div class="sort-info" style="margin-bottom: 20px; font-style: italic; color: var(--gray); padding: 0 10px;">
-                    <i class="fas fa-sort"></i> Trié par: ${currentSort === 'stepNumber' ? 'Numéro d\'étape' : 
-                               currentSort === 'date' ? 'Date et heure' : 
-                               'Catégorie'} | ${photosToShow.length} photo(s)
-                </div>
-                <div class="photos-grid">${photosHTML}</div>
-            `;
-        }
-
-        function updateDesignation(photoId, newDesignation) {
-            const photo = photos.find(p => p.id === photoId);
-            if (photo) {
-                photo.designation = newDesignation;
-                savePhotos();
-            }
-        }
-
-        function updateCategory(photoId, newCategory) {
-            const photo = photos.find(p => p.id === photoId);
-            if (photo) {
-                photo.category = newCategory;
-                savePhotos();
-                renderPhotos();
-                renderCategories();
-            }
-        }
-
-        function updateStepNumber(photoId, newStepNumber) {
-            const photo = photos.find(p => p.id === photoId);
-            if (photo) {
-                photo.stepNumber = parseInt(newStepNumber) || 0;
-                savePhotos();
-            }
-        }
-
-        function updateDate(photoId, newDate) {
-            const photo = photos.find(p => p.id === photoId);
-            if (photo) {
-                photo.date = newDate;
-                savePhotos();
-            }
-        }
-
-        function updateTime(photoId, newTime) {
-            const photo = photos.find(p => p.id === photoId);
-            if (photo) {
-                photo.time = newTime;
-                savePhotos();
-            }
-        }
-
-        function removePhoto(photoId) {
-            if (confirm('Voulez-vous vraiment supprimer cette photo ?')) {
-                photos = photos.filter(p => p.id !== photoId);
-                savePhotos();
-                renderPhotos();
-                renderCategories();
-                updatePhotoCount();
-            }
-        }
-
-        function updatePhotoCount() {
-            const countElement = document.getElementById('photoCount');
-            if (countElement) {
-                countElement.textContent = `${photos.length} photo${photos.length > 1 ? 's' : ''} importée${photos.length > 1 ? 's' : ''}`;
-            }
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type === 'error' ? 'error' : type === 'warning' ? 'warning' : ''}`;
-            toast.innerHTML = `
-                <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
-                <span>${message}</span>
-            `;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => document.body.removeChild(toast), 300);
-            }, 4000);
-        }
-
-        function validatePhotoFields() {
-            for (const photo of photos) {
-                if (!photo.designation || !photo.category || 
-                    photo.stepNumber === undefined || isNaN(photo.stepNumber) || 
-                    !photo.date || !photo.time) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        function highlightMissingFields() {
-            const photoItems = document.querySelectorAll('.photo-item');
-            photoItems.forEach(item => {
-                const inputs = item.querySelectorAll('input');
-                let hasMissing = false;
-                
-                inputs.forEach(input => {
-                    if (!input.value) {
-                        input.style.borderColor = '#e74c3c';
-                        hasMissing = true;
-                    } else {
-                        input.style.borderColor = '';
-                    }
-                });
-                
-                const select = item.querySelector('select');
-                if (!select.value) {
-                    select.style.borderColor = '#e74c3c';
-                    hasMissing = true;
-                } else {
-                    select.style.borderColor = '';
-                }
-                
-                if (hasMissing) {
-                    item.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.3)';
-                } else {
-                    item.style.boxShadow = '';
-                }
-            });
-            
-            return false;
-        }
-
-        // Fonctions pour la modale de catégorie
-        function openCategoryModal() {
-            const modal = document.getElementById('categoryModal');
-            modal.style.display = 'flex';
-            
-            // Afficher l'aperçu de la photo
-            const preview = document.getElementById('pendingPhotoPreview');
-            preview.src = pendingPhoto.dataUrl;
-            
-            // Générer les boutons de catégorie
-            const optionsContainer = document.querySelector('.category-options');
-            optionsContainer.innerHTML = '';
-            
-            categories.forEach(category => {
-                const button = document.createElement('button');
-                button.className = 'category-option';
-                button.innerHTML = `<i class="${category.icon}"></i> ${category.name}`;
-                button.onclick = () => assignCategoryToPendingPhoto(category.id);
-                optionsContainer.appendChild(button);
-            });
-        }
-
-        function closeCategoryModal() {
-            const modal = document.getElementById('categoryModal');
-            modal.style.display = 'none';
-            pendingPhoto = null;
-        }
-
-        function assignCategoryToPendingPhoto(categoryId) {
-            if (pendingPhoto) {
-                const now = new Date();
-                const photo = {
-                    id: ++photoCounter,
-                    dataUrl: pendingPhoto.dataUrl,
-                    designation: `Photo ${photoCounter}`,
-                    filename: `photo-${now.toISOString().slice(0,19).replace(/:/g,'-')}.jpg`,
-                    category: categoryId,
-                    stepNumber: photoCounter,
-                    date: now.toISOString().split('T')[0],
-                    time: now.toTimeString().split(' ')[0].slice(0,5),
-                    rotation: 0
-                };
-                
-                photos.push(photo);
-                savePhotos();
-                renderPhotos();
-                renderCategories();
-                updatePhotoCount();
-                
-                showToast('Photo ajoutée avec succès !');
-                document.getElementById('exportSection').style.display = 'block';
-                
-                closeCategoryModal();
-            }
-        }
-
-        async function exportToPDF() {
-            if (photos.length === 0) {
-                showToast('Aucune photo à exporter', 'error');
-                return;
-            }
-
-            // Validation des champs
-            const validateFields = document.getElementById('validateFields').checked;
-            if (validateFields && !validatePhotoFields()) {
-                showToast('Veuillez remplir tous les champs pour chaque photo', 'error');
-                highlightMissingFields();
-                return;
-            }
-
-            const loadingSection = document.getElementById('loadingSection');
-            const exportButton = document.getElementById('exportButton');
-            const progressBar = document.getElementById('progressBar');
-            
-            loadingSection.style.display = 'block';
-            exportButton.disabled = true;
-            
-            try {
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF();
-                const pageWidth = pdf.internal.pageSize.width;
-                const pageHeight = pdf.internal.pageSize.height;
-                const margin = 15;
-                const headerHeight = 15;
-                const footerHeight = 15;
-                const contentHeight = pageHeight - headerHeight - footerHeight - margin * 2;
-                const maxImageWidth = pageWidth - 2 * margin;
-                const maxImageHeight = contentHeight / 2 - 40;
-
-                // Mise à jour de la barre de progression
-                progressBar.style.width = '10%';
-
-                // Fonction pour formater la date en JJ/MM/AAAA
-                const formatDate = (dateStr) => {
-                    if (!dateStr) return '';
-                    const [year, month, day] = dateStr.split('-');
-                    return `${day}/${month}/${year}`;
-                };
-
-                // Fonction pour ajouter un en-tête
-                const addHeader = (pdf, pageNumber) => {
-                    pdf.setFontSize(10);
-                    pdf.setTextColor(100);
-                    pdf.text(`Rapport Photo Chantier - Page ${pageNumber}`, margin, 10);
-                };
-
-                // Fonction pour ajouter un pied de page
-                const addFooter = (pdf) => {
-                    pdf.setFontSize(9);
-                    pdf.setTextColor(100);
-                    const date = new Date().toLocaleDateString('fr-FR');
-                    pdf.text(`Généré le ${date}`, margin, pageHeight - 5);
-                    pdf.text(document.getElementById('agence').value || '', pageWidth - margin, pageHeight - 5, { align: 'right' });
-                };
-
-                // Récupérer les informations du projet
-                const projectInfo = {
-                    affaire: document.getElementById('affaire').value || 'Non renseigné',
-                    code: document.getElementById('code').value || 'Non renseigné',
-                    agence: document.getElementById('agence').value || 'Non renseigné',
-                    rapportType: document.getElementById('rapportType').value || 'Non renseigné',
-                    essais: document.getElementById('essais').value || 'Non renseigné',
-                    rmu: document.getElementById('rmu').value || 'Non renseigné'
-                };
-
-                // Ajouter la page de titre
-                pdf.setFontSize(24);
-                pdf.setTextColor(25, 72, 78);
-                pdf.text('RAPPORT PHOTO CHANTIER', pageWidth / 2, 40, { align: 'center' });
-                
-                pdf.setFontSize(18);
-                pdf.setTextColor(41, 128, 185);
-                pdf.text(projectInfo.affaire, pageWidth / 2, 55, { align: 'center' });
-                
-                pdf.setFontSize(14);
-                pdf.setTextColor(52, 73, 94);
-                pdf.text('Informations du projet', pageWidth / 2, 75, { align: 'center' });
-                
+                // Photo title/designation
+                pdf.setTextColor(0);
+                pdf.setFont('helvetica','bold');
                 pdf.setFontSize(12);
-                pdf.setTextColor(44, 62, 80);
-                let yPosition = 90;
+                pdf.text(photo.designation || `Photo ${photo.id}`, pageW/2, detailsY, {align:'center'});
                 
-                // Afficher les informations du projet
-                Object.entries(projectInfo).forEach(([key, value], index) => {
-                    const text = `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`;
-                    pdf.text(text, pageWidth / 2, yPosition + index * 10, { align: 'center' });
-                });
-
-                pdf.addPage();
+                // FIXED: Photo details with step number, date, time, and category
+                pdf.setFont('helvetica','normal');
+                pdf.setFontSize(10);
+                pdf.setTextColor(100);
                 
-
-                // Mise à jour de la barre de progression
-                progressBar.style.width = '20%';
-
-                // Trier toutes les photos par catégorie et par numéro d'étape
-                let sortedPhotos = [];
-                for (const category of categories) {
-                    const categoryPhotos = photos.filter(p => p.category === category.id)
-                                                .sort((a, b) => a.stepNumber - b.stepNumber);
-                    sortedPhotos = sortedPhotos.concat(categoryPhotos);
-                }
-
-                // Diviser en groupes de 2 photos par page
-                const groups = [];
-                for (let i = 0; i < sortedPhotos.length; i += 2) {
-                    groups.push(sortedPhotos.slice(i, i + 2));
-                }
-
-                // Ajouter les pages de photos
-                for (let i = 0; i < groups.length; i++) {
-                    if (i > 0) {
-                        pdf.addPage();
-                    }
-                    
-                    const currentPage = pdf.internal.getNumberOfPages();
-                    addHeader(pdf, currentPage);
-                    
-                    const group = groups[i];
-                    
-                    // Pour chaque photo dans le groupe (1 ou 2 photos)
-                    for (let j = 0; j < group.length; j++) {
-                        const photo = group[j];
-                        const categoryName = categories.find(c => c.id === photo.category)?.name || 'Non assignée';
-                        
-                        // Position verticale pour cette photo
-                        const yStart = headerHeight + margin + j * (contentHeight / 2);
-                        
-                        // Afficher le bandeau de catégorie
-                        pdf.setFillColor(25, 72, 78);
-                        pdf.rect(margin, yStart, pageWidth - 2 * margin, 15, 'F');
-                        pdf.setTextColor(255);
-                        pdf.setFontSize(11);
-                        pdf.text(categoryName, margin + 5, yStart + 10);
-                        
-                        // Charger l'image
-                        const img = new Image();
-                        img.src = photo.dataUrl;
-                        await new Promise((resolve) => {
-                            img.onload = resolve;
-                        });
-
-                        // Calculer les dimensions de l'image
-                        const ratio = img.width / img.height;
-                        let imgWidth = maxImageWidth;
-                        let imgHeight = imgWidth / ratio;
-                        
-                        // Ajuster si l'image est trop haute
-                        if (imgHeight > maxImageHeight) {
-                            imgHeight = maxImageHeight;
-                            imgWidth = imgHeight * ratio;
-                        }
-                        
-                        // Centrer l'image horizontalement
-                        const xPosition = margin + (maxImageWidth - imgWidth) / 2;
-                        
-                        // Ajouter l'image
-                        pdf.addImage(img, 'JPEG', xPosition, yStart + 20, imgWidth, imgHeight);
-                        
-                        // Ajouter les informations sous l'image
-                        pdf.setTextColor(0);
-                        pdf.setFontSize(11);
-                        pdf.text(photo.designation, pageWidth / 2, yStart + 30 + imgHeight, { align: 'center' });
-                        
-                        pdf.setFontSize(10);
-                        pdf.setTextColor(100);
-                        const infoText = `Étape: ${photo.stepNumber} | Date: ${formatDate(photo.date)} ${photo.time}`;
-                        pdf.text(infoText, pageWidth / 2, yStart + 35 + imgHeight, { align: 'center' });
-                    }
-
-                    // Mise à jour de la barre de progression
-                    progressBar.style.width = `${20 + (i+1)/groups.length*70}%`;
-                }
-
-                // Ajouter le pied de page à chaque page
-                const totalPages = pdf.internal.getNumberOfPages();
-                for (let i = 1; i <= totalPages; i++) {
-                    pdf.setPage(i);
-                    addFooter(pdf);
-                }
-
-                // Générer le PDF
-                const fileName = `rapport-photos-${projectInfo.affaire || 'chantier'}-${new Date().toISOString().slice(0, 10)}.pdf`;
-                pdf.save(fileName);
+                const stepText = `Étape: ${photo.stepNumber || 'N/A'}`;
+                const dateText = `Date: ${formatDate(photo.date) || 'N/A'}`;
+                const timeText = `Heure: ${formatTime(photo.time) || 'N/A'}`;
+                const categoryText = `Catégorie: ${getCategoryName(photo.category)}`;
                 
-                showToast('Rapport PDF généré avec succès !');
-            } catch (error) {
-                console.error('Erreur lors de la génération du PDF:', error);
-                showToast('Erreur lors de la génération du PDF', 'error');
-            } finally {
-                loadingSection.style.display = 'none';
-                exportButton.disabled = false;
-                progressBar.style.width = '0';
+                // Display details in two lines
+                const line1 = `${stepText} • ${dateText} • ${timeText}`;
+                const line2 = categoryText;
+                
+                pdf.text(line1, pageW/2, detailsY + 12, {align:'center'});
+                pdf.text(line2, pageW/2, detailsY + 22, {align:'center'});
+              }
+
+              // Move cursor for next photo
+              if (slot === 0) {
+                yCursor = headerH + margin + (contentH / 2) + 15;
+              }
+
+              totalProgress += progressPerPhoto;
+              bar.style.width = Math.min(95, totalProgress) + '%';
             }
+
+            photoIndex += photosOnThisPage;
+            addFooter();
+          }
         }
-    </script>
+
+        // Add page numbers to all pages
+        const totalPages = pdf.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          pdf.setPage(i);
+          addFooter();
+        }
+
+        bar.style.width = '100%';
+
+        // Generate filename
+        const fileName = `rapport-photos-${(info.affaire || 'projet').replace(/[^a-z0-9\-_]+/gi, '_').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`;
+        
+        pdf.save(fileName);
+        showToast('Rapport PDF professionnel généré avec succès !', 'success');
+        
+      } catch(e) {
+        console.error(e); 
+        showToast('Erreur lors de la génération du PDF', 'error');
+      } finally {
+        loading.style.display = 'none'; 
+        btn.disabled = false; 
+        bar.style.width = '0';
+      }
+    }
+
+    function validatePhotoFields(){
+      for (const p of photos){ 
+        if(!p.designation || !p.category || isNaN(p.stepNumber) || !p.date || !p.time) 
+          return false; 
+      }
+      return true;
+    }
+    
+    function highlightMissingFields(){
+      document.querySelectorAll('.photo-item').forEach(item=>{
+        const inputs = item.querySelectorAll('input'); 
+        let hasMissing = false;
+        inputs.forEach(input => { 
+          if(!input.value){ 
+            input.style.borderColor = '#e74c3c'; 
+            hasMissing = true; 
+          } else {
+            input.style.borderColor = ''; 
+          }
+        });
+        const select = item.querySelector('select'); 
+        if(!select.value){ 
+          select.style.borderColor = '#e74c3c'; 
+          hasMissing = true; 
+        } else {
+          select.style.borderColor = '';
+        }
+        item.style.boxShadow = hasMissing ? '0 0 0 2px rgba(231,76,60,.25)' : '';
+      });
+    }
+
+    function ts(){ 
+      return new Date().toISOString().replace(/:/g,'-').replace(/\./g, '-');
+    }
+  </script>
 </body>
 </html>
