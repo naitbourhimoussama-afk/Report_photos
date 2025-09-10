@@ -1088,5 +1088,13 @@
 
     function ts(){ return new Date().toISOString().replace(/:/g,'-').replace(/\./g, '-'); }
   </script>
+  <script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+  const supabase = createClient("⚡URL⚡","⚡ANON_KEY⚡")
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session) location.href = "./login.html"
+  </script>
+
 </body>
 </html>
+
